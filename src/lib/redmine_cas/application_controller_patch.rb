@@ -18,6 +18,8 @@ module RedmineCAS
     end
 
     module InstanceMethods
+      FQDN = ENV['FQDN']
+
       def cas_find_current_user
         if /\AProxyTicket /i.match?(request.authorization.to_s)
           begin
