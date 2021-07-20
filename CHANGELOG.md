@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+* Option to authenticate with Proxy Ticket (#6)
+
 ## [v1.3.1] - 2021-04-21
 ### Fixed
 - Fixed a bug regarding the creation of users that lead to internal server errors
