@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 * Option to authenticate with Proxy Ticket (#6)
+* Troubleshooting guide for importing ruby projects into IntelliJ
+### Fixed
+* Repaired basic auth authentication for (#8)
 
 ## [v1.3.1] - 2021-04-21
 ### Fixed

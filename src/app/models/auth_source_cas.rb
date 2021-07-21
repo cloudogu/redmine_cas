@@ -66,16 +66,72 @@ class AuthSourceCas < AuthSource
     return http.request(request)
   end
 
-  def api_request_get(uri, params)
-    http_uri = URI.parse(uri)
-    http = Net::HTTP.new(http_uri.host, http_uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    logger.info("URI: " + http_uri.path.concat('&', params.collect { |k, v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&')))
-    http_path_with_params = http_uri.path.concat('&', params.collect { |k, v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&'))
-    request = Net::HTTP::Post.new(http_path_with_params)
-    return http.request(request)
-    #return Net::HTTP.get(http_uri.path.concat(params.collect { |k,v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&'))) if not params.nil?
+  def create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, auth_source_id)
+    # Get ces admin group
+    admingroup_exists = false
+    if Ces_admin_group != ''
+      admingroup_exists = true
+    end
+
+    user = User.find_by_login(login)
+    if user == nil # user not in redmine yet
+
+      user = User.new
+      user.login = login
+      user.firstname = user_givenName
+      user.lastname = user_surname
+      user.mail = user_mail
+      user.auth_source_id = auth_source_id
+      if admingroup_exists
+        if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
+          user.admin = 1
+        end
+      end
+
+      for i in user_groups
+        # create group / add user to group
+        add_user_to_group(i.to_s, user)
+      end
+
+      if !user.save
+        raise user.errors.full_messages.to_s
+      end
+    else
+      # user already in redmine
+      @usergroups = Array.new
+      for i in user_groups
+        @usergroups << i.to_s
+        # create group / add user to group
+        add_user_to_group(i.to_s, user)
+      end
+
+      # remove user from groups he is not in any more
+      @casgroups = Group.where(firstname: 'cas')
+      for l in @casgroups
+        @casgroup = Group.find_by(lastname: l.to_s)
+        @casgroupusers = User.active.in_group(@casgroup).all()
+        for m in @casgroupusers
+          if (m.login == login) and not (@usergroups.include?(l.to_s))
+            @casgroup.users.delete(user)
+          end
+        end
+      end
+
+      # remove user's admin rights if he is not in admin group any more
+      casAdminPermissionsCustomField = UserCustomField.find_by_name('casAdmin')
+      # We currently save the value for the casAdmin Field as `true` or `false`. However, redmine saves them as `1` and `0`. We need to support both.
+      wasCreatedByCAS = user.custom_field_value(casAdminPermissionsCustomField).is_true?
+      if admingroup_exists and wasCreatedByCAS
+        if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
+          user.admin = 1
+        else
+          user.admin = 0
+        end
+        user.save
+      end
+    end
+
+    return user
   end
 
   def authenticate(login, password)
@@ -97,177 +153,57 @@ class AuthSourceCas < AuthSource
       st_form_data = { 'service' => 'https://' + FQDN + '/redmine' }
       serviceTicket = api_request(st_uri, st_form_data)
 
-      logger.info(">>> Service Ticket" + serviceTicket.body)
-
       if serviceTicket.code == '200'
-        # get user information from cas and parse it to retVal
-        # service_url = 'https://' + FQDN + '/redmine'
-        # sv_uri = 'https://' + FQDN + '/cas/p3/serviceValidate'
-        # params = { :ticket => serviceTicket.body, :service => service_url }
-        # serviceVali = api_request_get(sv_uri, params)
-
-        logger.info(">>> Before Validation")
-
         ticket = serviceTicket.body
         service = "https://#{FQDN}/redmine"
         pt = CASClient::ServiceTicket.new(ticket, service)
+        #Validate Service Ticket --> GET /p3/serviceValidate
         validationResponse = CASClient::Frameworks::Rails::Filter.client.validate_service_ticket(pt)
 
-        logger.error(">>> Validation Response: " + validationResponse)
-
-        if validationResponse.success
-          logger.error(validationResponse)
-        end
-
         # check if validation was successful
-        if (Nokogiri::XML(serviceVali.body).xpath('//cas:serviceResponse').to_s).include? 'Success'
-          userAttributes = Nokogiri::XML(serviceVali.body)
-          user_mail = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:mail').content.to_s
-          user_surname = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:surname').content.to_s
-          user_givenName = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:givenName').content.to_s
-          user_groups = userAttributes.xpath('//cas:authenticationSuccess//cas:attributes//cas:groups')
+        if validationResponse.success
+          userAttributes = validationResponse.extra_attributes
 
-          # Get ces admin group
-          admingroup_exists = false
-          if Ces_admin_group != ''
-            admingroup_exists = true
-          end
-        end
+          user_mail = userAttributes["mail"]
+          user_surname = userAttributes["surname"]
+          user_givenName = userAttributes["givenName"]
+          user_groups = userAttributes["groups"].split(',')
 
-        user = User.find_by_login(login)
-        if user == nil # user not in redmine yet
+          create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, self.id)
 
-          user = User.new
-          user.login = login
-          user.firstname = user_givenName
-          user.lastname = user_surname
-          user.mail = user_mail
-          user.auth_source_id = auth_source_id
-          if admingroup_exists
-            if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
-              user.admin = 1
-            end
-          end
-
-          for i in user_groups
-            # create group / add user to group
-            add_user_to_group(i.to_s, user)
-          end
-
-          if !user.save
-            raise user.errors.full_messages.to_s
-          end
+          # return new user information
+          retVal =
+            {
+              :firstname => user_givenName,
+              :lastname => user_surname,
+              :mail => user_mail,
+              :auth_source_id => self.id
+            }
+          return retVal
         else
-          # user already in redmine
-          @usergroups = Array.new
-          for i in user_groups
-            @usergroups << i.to_s
-            # create group / add user to group
-            add_user_to_group(i.to_s, user)
-          end
-
-          # remove user from groups he is not in any more
-          @casgroups = Group.where(firstname: 'cas')
-          for l in @casgroups
-            @casgroup = Group.find_by(lastname: l.to_s)
-            @casgroupusers = User.active.in_group(@casgroup).all()
-            for m in @casgroupusers
-              if (m.login == login) and not (@usergroups.include?(l.to_s))
-                @casgroup.users.delete(user)
-              end
-            end
-          end
-
-          # remove user's admin rights if he is not in admin group any more
-          casAdminPermissionsCustomField = UserCustomField.find_by_name('casAdmin')
-          # We currently save the value for the casAdmin Field as `true` or `false`. However, redmine saves them as `1` and `0`. We need to support both.
-          wasCreatedByCAS = user.custom_field_value(casAdminPermissionsCustomField).is_true?
-          if admingroup_exists and wasCreatedByCAS
-            if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
-              user.admin = 1
-            else
-              user.admin = 0
-            end
-            user.save
-          end
+          logger.error('Service ticket validation failure')
         end
-
-        return user
+      else
+        logger.error('No Service ticket granted')
       end
-
-      def authenticate(login, password)
-        return nil if login.blank? || password.blank?
-
-        # request a ticket granting ticket
-        tgt_uri = 'https://' + FQDN + '/cas/v1/tickets'
-        tgt_form_data = { 'username' => login, 'password' => password }
-        tgt = api_request(tgt_uri, tgt_form_data)
-
-        if tgt.code == '201'
-          # get ticket granting ticket from response
-          forms = Nokogiri::HTML(tgt.body).xpath('//form').to_s
-          sub = forms.index('https')
-          sub2 = forms.index('method')
-          tgticket = forms.to_s[sub, sub2 - sub - 2]
-          # request a service ticket
-          st_uri = tgticket
-          st_form_data = { 'service' => 'https://' + FQDN + '/redmine' }
-          serviceTicket = api_request(st_uri, st_form_data)
-
-          if serviceTicket.code == '200'
-            # get user information from cas and parse it to retVal
-            sv_uri = 'https://' + FQDN + '/cas/p3/serviceValidate'
-            sv_form_data = { 'service' => 'https://' + FQDN + '/redmine', 'ticket' => serviceTicket.body }
-            serviceVali = api_request(sv_uri, sv_form_data)
-
-            # check if validation was successful
-            if (Nokogiri::XML(serviceVali.body).xpath('//cas:serviceResponse').to_s).include? 'Success'
-              userAttributes = Nokogiri::XML(serviceVali.body)
-              user_mail = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:mail').content.to_s
-              user_surname = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:surname').content.to_s
-              user_givenName = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:givenName').content.to_s
-              user_groups = []
-              user_groups_xml = userAttributes.xpath('//cas:authenticationSuccess//cas:attributes//cas:groups')
-              for i in user_groups_xml
-                user_groups.push(i.content.to_s)
-              end
-
-              create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, self.id)
-
-              # return new user information
-              retVal =
-                {
-                  :firstname => user_givenName,
-                  :lastname => user_surname,
-                  :mail => user_mail,
-                  :auth_source_id => self.id
-                }
-              return retVal
-            else
-              logger.error('Service ticket validation failure')
-            end
-          else
-            logger.error('No Service ticket granted')
-          end
-        else
-          logger.error('Authentication data not accepted')
-        end
-        return nil
-      rescue *NETWORK_EXCEPTIONS => e
-        raise AuthSourceException.new(e.message)
-      end
-
-      def auth_method_name
-        'CAS'
-      end
-
-      def create_group_with_user(group, user)
-        logger.info 'create new group "' + group + '" and add member "' + user.to_s + '"'
-        # create group and add user
-        @newgroup = Group.new(:lastname => group, :firstname => 'cas')
-        @newgroup.users << user
-        @newgroup.save!
-      end
+    else
+      logger.error('Authentication data not accepted')
     end
+    return nil
+  rescue *NETWORK_EXCEPTIONS => e
+    raise AuthSourceException.new(e.message)
   end
+
+  def auth_method_name
+    'CAS'
+  end
+
+  def create_group_with_user(group, user)
+    logger.info 'create new group "' + group + '" and add member "' + user.to_s + '"'
+    # create group and add user
+    @newgroup = Group.new(:lastname => group, :firstname => 'cas')
+    @newgroup.users << user
+    @newgroup.save!
+  end
+
 end
