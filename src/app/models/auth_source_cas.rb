@@ -97,14 +97,27 @@ class AuthSourceCas < AuthSource
       st_form_data = { 'service' => 'https://' + FQDN + '/redmine' }
       serviceTicket = api_request(st_uri, st_form_data)
 
+      logger.info(">>> Service Ticket" + serviceTicket.body)
+
       if serviceTicket.code == '200'
         # get user information from cas and parse it to retVal
-        service_url = 'https://' + FQDN + '/redmine'
-        sv_uri = 'https://' + FQDN + '/cas/p3/serviceValidate'
-        params = { :ticket => serviceTicket.body, :service => service_url }
-        serviceVali = api_request_get(sv_uri, params)
+        # service_url = 'https://' + FQDN + '/redmine'
+        # sv_uri = 'https://' + FQDN + '/cas/p3/serviceValidate'
+        # params = { :ticket => serviceTicket.body, :service => service_url }
+        # serviceVali = api_request_get(sv_uri, params)
 
-        logger.error(serviceVali.body)
+        logger.info(">>> Before Validation")
+
+        ticket = serviceTicket.body
+        service = "https://#{FQDN}/redmine"
+        pt = CASClient::ServiceTicket.new(ticket, service)
+        validationResponse = CASClient::Frameworks::Rails::Filter.client.validate_service_ticket(pt)
+
+        logger.error(">>> Validation Response: " + validationResponse)
+
+        if validationResponse.success
+          logger.error(validationResponse)
+        end
 
         # check if validation was successful
         if (Nokogiri::XML(serviceVali.body).xpath('//cas:serviceResponse').to_s).include? 'Success'
