@@ -66,6 +66,18 @@ class AuthSourceCas < AuthSource
     return http.request(request)
   end
 
+  def api_request_get(uri, params)
+    http_uri = URI.parse(uri)
+    http = Net::HTTP.new(http_uri.host,http_uri.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    logger.info("URI: " + http_uri.path.concat('&', params.collect { |k,v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&')))
+    http_path_with_params = http_uri.path.concat('&', params.collect { |k,v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&'))
+    request = Net::HTTP::Post.new(http_path_with_params)
+    return http.request(request)
+    #return Net::HTTP.get(http_uri.path.concat(params.collect { |k,v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&'))) if not params.nil?
+  end
+
   def authenticate(login, password)
     return nil if login.blank? || password.blank?
 
@@ -87,9 +99,12 @@ class AuthSourceCas < AuthSource
 
       if serviceTicket.code == '200'
         # get user information from cas and parse it to retVal
+        service_url = 'https://'+FQDN+'/redmine'
         sv_uri = 'https://'+FQDN+'/cas/p3/serviceValidate'
-        sv_form_data = {'service' => 'https://'+FQDN+'/redmine', 'ticket' => serviceTicket.body}
-        serviceVali = api_request(sv_uri, sv_form_data)
+        params = {:ticket => serviceTicket.body, :service => service_url}
+        serviceVali = api_request_get(sv_uri, params)
+
+        logger.error(serviceVali.body)
 
         # check if validation was successful
         if (Nokogiri::XML(serviceVali.body).xpath('//cas:serviceResponse').to_s).include? 'Success'
