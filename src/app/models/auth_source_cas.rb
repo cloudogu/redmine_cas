@@ -1,6 +1,3 @@
-# require 'net/ldap'
-# require 'net/ldap/dn'
-# require 'timeout'
 require 'net/http'
 require 'net/https'
 
@@ -30,6 +27,7 @@ class AuthSourceCas < AuthSource
   # read required settings from environment
   FQDN = ENV['FQDN']
   Ces_admin_group = ENV['ADMIN_GROUP']
+  ENDPOINT = 'https://' + FQDN + ENV['RAILS_RELATIVE_URL_ROOT']
 
   def add_user_to_group(groupname, user)
     begin
@@ -150,13 +148,13 @@ class AuthSourceCas < AuthSource
       tgticket = forms.to_s[sub, sub2 - sub - 2]
       # request a service ticket
       st_uri = tgticket
-      st_form_data = { 'service' => 'https://' + FQDN + '/redmine' }
+      st_form_data = { 'service' => ENDPOINT }
       serviceTicket = api_request(st_uri, st_form_data)
 
       if serviceTicket.code == '200'
         # get user information from cas and parse it to retVal
         sv_uri = 'https://' + FQDN + '/cas/p3/serviceValidate'
-        sv_form_data = { 'service' => 'https://' + FQDN + '/redmine', 'ticket' => serviceTicket.body }
+        sv_form_data = { 'service' => ENDPOINT, 'ticket' => serviceTicket.body }
         serviceVali = api_request(sv_uri, sv_form_data)
 
         # check if validation was successful
