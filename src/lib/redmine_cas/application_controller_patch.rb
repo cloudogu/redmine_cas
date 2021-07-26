@@ -19,12 +19,13 @@ module RedmineCAS
 
     module InstanceMethods
       FQDN = ENV['FQDN']
+      ENDPOINT = 'https://' + FQDN + ENV['RAILS_RELATIVE_URL_ROOT']
 
       def cas_find_current_user
         if /\AProxyTicket /i.match?(request.authorization.to_s)
           begin
             ticket = request.authorization.to_s.split(" ", 2)[1]
-            service = "https://#{FQDN}/redmine"
+            service = ENDPOINT
             pt = CASClient::ServiceTicket.new(ticket, service)
             validationResponse = CASClient::Frameworks::Rails::Filter.client.validate_proxy_ticket(pt)
             if validationResponse.success
