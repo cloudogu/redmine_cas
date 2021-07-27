@@ -151,6 +151,7 @@ class AuthSourceCas < AuthSource
       st_form_data = { 'service' => ENDPOINT }
       serviceTicket = api_request(st_uri, st_form_data)
 
+      # successfully got ticket granting ticket?
       if serviceTicket.code == '200'
         ticket = serviceTicket.body
         service = ENDPOINT

@@ -1,9 +1,11 @@
-require 'redmine'
-require 'redmine_cas'
-require 'redmine_cas/application_controller_patch'
-require 'redmine_cas/account_controller_patch'
+RedmineExtensions::Reloader.to_prepare do
+  require 'redmine'
+  require 'redmine_cas'
+  require 'redmine_cas/application_controller_patch'
+  require 'redmine_cas/account_controller_patch'
 
-require_dependency 'redmine_cas_hook_listener'
+  require_dependency 'redmine_cas_hook_listener'
+end
 
 Redmine::Plugin.register :redmine_cas do
   name 'Redmine CAS plugin'
