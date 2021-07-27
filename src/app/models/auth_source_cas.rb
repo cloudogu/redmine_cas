@@ -27,7 +27,7 @@ class AuthSourceCas < AuthSource
   # read required settings from environment
   FQDN = ENV['FQDN']
   Ces_admin_group = ENV['ADMIN_GROUP']
-  ENDPOINT = 'https://' + FQDN + ENV['RAILS_RELATIVE_URL_ROOT']
+  ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
 
   def add_user_to_group(groupname, user)
     begin
