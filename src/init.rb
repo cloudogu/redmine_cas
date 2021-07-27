@@ -1,10 +1,15 @@
-RedmineExtensions::Reloader.to_prepare do
-  require 'redmine'
-  require 'redmine_cas'
-  require 'redmine_cas/application_controller_patch'
-  require 'redmine_cas/account_controller_patch'
+# This serves only the purpose of making development with easy redmine less painful as it enables one to develop
+# this plugin and (re)start it via the apply.sh script. Otherwise you need to do a full build of EasyRedmine as the copy
+# of the init.rb is part of the Dockerfile.
+if ENV['RAILS_RELATIVE_URL_ROOT'] == "/easyredmine"
+  RedmineExtensions::Reloader.to_prepare do
+    require 'redmine'
+    require 'redmine_cas'
+    require 'redmine_cas/application_controller_patch'
+    require 'redmine_cas/account_controller_patch'
 
-  require_dependency 'redmine_cas_hook_listener'
+    require_dependency 'redmine_cas_hook_listener'
+  end
 end
 
 Redmine::Plugin.register :redmine_cas do
