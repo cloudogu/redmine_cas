@@ -21,7 +21,7 @@ You can use the scripts inside the `dev`-folder to quickly install this plugin
 1. Place this repository somewhere inside the EcoSystem
 2. Navigate to the `dev` folder   
 3. Execute `./apply.sh <doguname>` to install this plugin for a dogu (redmine/easyredmine)
-4. If you want to see extended logs, execute `dev/logs.sh <doguname>` 
+4. If you want to see extended logs, execute `logs.sh <doguname>` 
 
 ## Notes
 
