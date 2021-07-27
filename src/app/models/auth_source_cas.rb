@@ -1,6 +1,3 @@
-# require 'net/ldap'
-# require 'net/ldap/dn'
-# require 'timeout'
 require 'net/http'
 require 'net/https'
 
@@ -30,6 +27,7 @@ class AuthSourceCas < AuthSource
   # read required settings from environment
   FQDN = ENV['FQDN']
   Ces_admin_group = ENV['ADMIN_GROUP']
+  ENDPOINT = 'https://' + FQDN + ENV['RAILS_RELATIVE_URL_ROOT']
 
   def add_user_to_group(groupname, user)
     begin
@@ -150,12 +148,12 @@ class AuthSourceCas < AuthSource
       tgticket = forms.to_s[sub, sub2 - sub - 2]
       # request a service ticket
       st_uri = tgticket
-      st_form_data = { 'service' => 'https://' + FQDN + '/redmine' }
+      st_form_data = { 'service' => ENDPOINT }
       serviceTicket = api_request(st_uri, st_form_data)
 
       if serviceTicket.code == '200'
         ticket = serviceTicket.body
-        service = "https://#{FQDN}/redmine"
+        service = ENDPOINT
         pt = CASClient::ServiceTicket.new(ticket, service)
         #Validate Service Ticket --> GET /p3/serviceValidate
         validationResponse = CASClient::Frameworks::Rails::Filter.client.validate_service_ticket(pt)
