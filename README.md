@@ -19,8 +19,9 @@ We use [CASino](http://casino.rbcas.com) as CAS server, but it might work with o
 You can use the scripts inside the `dev`-folder to quickly install this plugin 
 
 1. Place this repository somewhere inside the EcoSystem
-2. Execute `dev/apply.sh <doguname>` to install this plugin for a dogu (redmine/easyredmine)
-3. If you want to see extended logs, execute `dev/logs.sh <doguname>` 
+2. Navigate to the `dev` folder   
+3. Execute `./apply.sh <doguname>` to install this plugin for a dogu (redmine/easyredmine)
+4. If you want to see extended logs, execute `logs.sh <doguname>` 
 
 ## Notes
 
