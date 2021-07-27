@@ -27,7 +27,7 @@ class AuthSourceCas < AuthSource
   # read required settings from environment
   FQDN = ENV['FQDN']
   Ces_admin_group = ENV['ADMIN_GROUP']
-  ENDPOINT = 'https://' + FQDN + ENV['RAILS_RELATIVE_URL_ROOT']
+  ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
 
   def add_user_to_group(groupname, user)
     begin
@@ -151,23 +151,22 @@ class AuthSourceCas < AuthSource
       st_form_data = { 'service' => ENDPOINT }
       serviceTicket = api_request(st_uri, st_form_data)
 
+      # successfully got ticket granting ticket?
       if serviceTicket.code == '200'
-        # get user information from cas and parse it to retVal
-        sv_uri = 'https://' + FQDN + '/cas/p3/serviceValidate'
-        sv_form_data = { 'service' => ENDPOINT, 'ticket' => serviceTicket.body }
-        serviceVali = api_request(sv_uri, sv_form_data)
+        ticket = serviceTicket.body
+        service = ENDPOINT
+        pt = CASClient::ServiceTicket.new(ticket, service)
+        #Validate Service Ticket --> GET /p3/serviceValidate
+        validationResponse = CASClient::Frameworks::Rails::Filter.client.validate_service_ticket(pt)
 
         # check if validation was successful
-        if (Nokogiri::XML(serviceVali.body).xpath('//cas:serviceResponse').to_s).include? 'Success'
-          userAttributes = Nokogiri::XML(serviceVali.body)
-          user_mail = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:mail').content.to_s
-          user_surname = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:surname').content.to_s
-          user_givenName = userAttributes.at_xpath('//cas:authenticationSuccess//cas:attributes//cas:givenName').content.to_s
-          user_groups = []
-          user_groups_xml = userAttributes.xpath('//cas:authenticationSuccess//cas:attributes//cas:groups')
-          for i in user_groups_xml
-            user_groups.push(i.content.to_s)
-          end
+        if validationResponse.success
+          userAttributes = validationResponse.extra_attributes
+
+          user_mail = userAttributes["mail"]
+          user_surname = userAttributes["surname"]
+          user_givenName = userAttributes["givenName"]
+          user_groups = userAttributes["groups"].split(',')
 
           create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, self.id)
 

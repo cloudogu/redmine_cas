@@ -19,7 +19,7 @@ module RedmineCAS
 
     module InstanceMethods
       FQDN = ENV['FQDN']
-      ENDPOINT = 'https://' + FQDN + ENV['RAILS_RELATIVE_URL_ROOT']
+      ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
 
       def cas_find_current_user
         if /\AProxyTicket /i.match?(request.authorization.to_s)
