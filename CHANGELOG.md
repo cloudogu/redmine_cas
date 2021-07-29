@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v1.4.3] - 2021-07-29
+## [v1.4.4] - 2021-07-29
 ### Fixed
 - processing group information did not take into account that the user may have no groups assigned (#14) 
 
