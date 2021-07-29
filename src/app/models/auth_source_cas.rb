@@ -89,7 +89,7 @@ class AuthSourceCas < AuthSource
       for i in user_groups
         # create group / add user to group
         add_user_to_group(i.to_s, user)
-      end unless user_groups.nil?
+      end
 
       if !user.save
         raise user.errors.full_messages.to_s
@@ -101,7 +101,7 @@ class AuthSourceCas < AuthSource
         @usergroups << i.to_s
         # create group / add user to group
         add_user_to_group(i.to_s, user)
-      end unless user_groups.nil?
+      end
 
       # remove user from groups he is not in any more
       @casgroups = Group.where(firstname: 'cas')
@@ -166,7 +166,7 @@ class AuthSourceCas < AuthSource
           user_mail = userAttributes["mail"]
           user_surname = userAttributes["surname"]
           user_givenName = userAttributes["givenName"]
-          user_groups = userAttributes["groups"].split(',') unless userAttributes["groups"].nil?
+          user_groups = userAttributes["groups"].split(',')
 
           create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, self.id)
 
