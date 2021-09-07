@@ -166,7 +166,7 @@ class AuthSourceCas < AuthSource
           user_mail = userAttributes["mail"]
           user_surname = userAttributes["surname"]
           user_givenName = userAttributes["givenName"]
-          user_groups = userAttributes["groups"].split(',') unless userAttributes["groups"].nil?
+          user_groups = userAttributes["allgroups"].split(',') unless userAttributes["groups"].nil?
 
           create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, self.id)
 
