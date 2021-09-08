@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.4.5] - 2021-09-08
+### Fixed
+- not all groups the user should be assigned to will be processed during api authentication (#17)
+
 ## [v1.4.4] - 2021-07-29
 ### Fixed
 - processing group information did not take into account that the user may have no groups assigned (#14) 

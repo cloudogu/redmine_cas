@@ -23,8 +23,21 @@ You can use the scripts inside the `dev`-folder to quickly install this plugin
 3. Execute `./apply.sh <doguname>` to install this plugin for a dogu (redmine/easyredmine)
 4. If you want to see extended logs, execute `logs.sh <doguname>` 
 
+### Development with Easyredmine
+Easyredmine and Redmine have different ideas about how an `init.rb` file for a plugin should be structured, especially how the imports of the dependencies for the plugin should be loaded. The `init.rb` in this plugin is tailored for redmine.
+Therefore, when testing locally with easyredmine, the `init.rb` must be overwritten (please do not commit your changes to `init.rb`) so that it encapsulates the `require` statements like this:
+```ruby
+RedmineExtensions::Reloader.to_prepare do
+    require 'redmine'
+    require 'redmine_cas'
+    require 'redmine_cas/application_controller_patch'
+    require 'redmine_cas/account_controller_patch'
+    
+    require_dependency 'redmine_cas_hook_listener'
+end
+```
+After this is done you can proceed with testing as described above. 
 ## Notes
-
 ### Usage
 
 If your installation has no public areas ("Authentication required") and you are not logged in, you will be
