@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.4.6] - 2021-09-08
+### Fixed
+- groups were processed as plain string and not as array how redmine expects it
+
 ## [v1.4.5] - 2021-09-08
 ### Fixed
 - not all groups the user should be assigned to will be processed during api authentication (#17)
