@@ -141,7 +141,7 @@ module RedmineCAS
           return cas_account_pending unless user.active?
 
           user.update_attribute(:last_login_on, Time.now)
-          user.update_attributes(RedmineCAS.user_extra_attributes_from_session(session))
+          user.update(RedmineCAS.user_extra_attributes_from_session(session))
           if RedmineCAS.single_sign_out_enabled?
             # logged_user= would start a new session and break single sign-out
             User.current = user

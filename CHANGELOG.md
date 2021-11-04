@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- use `update` instead of `update_attributes` to support rails in version 6+ (#20)
+
 ## [v1.4.6] - 2021-09-08
 ### Fixed
 - groups were processed as plain string and not as array how redmine expects it
