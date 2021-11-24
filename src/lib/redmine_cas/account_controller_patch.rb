@@ -1,5 +1,5 @@
 require 'redmine_cas'
-CAS_URL = "/cas/login"
+CAS_URL = '/cas/login'
 
 module RedmineCAS
   module AccountControllerPatch
@@ -17,14 +17,16 @@ module RedmineCAS
       def cas_login
         return original_login unless RedmineCAS.enabled?
         return unless RedmineCAS.setting(:redirect_enabled)
+
         prev_url = request.referrer
         prev_url = home_url if prev_url.to_s.strip.empty?
-        login_url = CAS_URL + "?service=" + ERB::Util.url_encode(prev_url)
+        login_url = CAS_URL + '?service=' + ERB::Util.url_encode(prev_url)
         redirect_to login_url
       end
 
       def logout_with_cas
         return logout_without_cas unless RedmineCAS.enabled?
+
         logout_user
         CASClient::Frameworks::Rails::Filter.logout(self, home_url)
       end
@@ -40,17 +42,18 @@ module RedmineCAS
 
         if CASClient::Frameworks::Rails::Filter.filter(self)
           user = User.find_by_login(session[:cas_user])
-          admingroup_exists = false
           ces_admin_group = ENV['ADMIN_GROUP']
-          admingroup_exists = ces_admin_group != nil
+          admingroup_exists = !ces_admin_group.nil?
 
           # Auto-create user
           if user.nil? && RedmineCAS.autocreate_users?
             user = User.new
             user.login = session[:cas_user]
+
             user.auth_source_id = 1
             user.assign_attributes(RedmineCAS.user_extra_attributes_from_session(session))
-            return cas_user_not_created(user) if !user.save
+            return cas_user_not_created(user) unless user.save
+
             user.reload
           else
             user = User.find_by_login(session[:cas_user])
@@ -58,37 +61,35 @@ module RedmineCAS
 
           # Auto-create user's groups and/or add him/her
           @usergroups = Array.new
-          for i in session[:cas_extra_attributes]
-            if i[0]=="allgroups"
-              for j in i[1]
-                @usergroups << j
-                begin
-                  group = Group.find_by(lastname: j.to_s)
-                  if group.to_s == ""
-                    # if group does not exist
-                    # create group and add user
-                    @newgroup = Group.new(:lastname => j.to_s, :firstname => "cas")
-                    @newgroup.users << user
-                    @newgroup.save
-                  else
-                    # if not already: add user to existing group
-                    @groupusers = User.active.in_group(group).all()
-                    if not(@groupusers.include?(user))
-                      group.users << user
-                    end
-                  end
-                rescue Exception => e
-                  logger.info e.message
+          session[:cas_extra_attributes].each do |i|
+            next unless i[0] == 'allgroups'
+
+            i[1].each do |j|
+              @usergroups << j
+              begin
+                group = Group.find_by(lastname: j.to_s)
+                if group.to_s == ''
+                  # if group does not exist
+                  # create group and add user
+                  @newgroup = Group.new(lastname: j.to_s, firstname: 'cas')
+                  @newgroup.users << user
+                  @newgroup.save
+                else
+                  # if not already: add user to existing group
+                  @groupusers = User.active.in_group(group).all
+                  group.users << user unless @groupusers.include?(user)
                 end
+              rescue Exception => e
+                logger.info e.message
               end
-              @casgroups = Group.where(firstname: "cas")
-              for l in @casgroups
-                @casgroup = Group.find_by(lastname: l.to_s)
-                @casgroupusers = User.active.in_group(@casgroup).all()
-                if @casgroupusers.include?(user) and not(@usergroups.include?(l.to_s))
-                  # remove user from group
-                  @casgroup.users.delete(user)
-                end
+            end
+            @casgroups = Group.where(firstname: 'cas')
+            @casgroups.each do |l|
+              @casgroup = Group.find_by(lastname: l.to_s)
+              @casgroupusers = User.active.in_group(@casgroup).all
+              if @casgroupusers.include?(user) && !@usergroups.include?(l.to_s)
+                # remove user from group
+                @casgroup.users.delete(user)
               end
             end
           end
@@ -109,28 +110,24 @@ module RedmineCAS
               casAdminPermissionsCustomField.save!
             end
 
-            if @usergroups.include?(ces_admin_group.gsub("\n",""))
+            if @usergroups.include?(ces_admin_group.gsub("\n", ''))
               user.update_attribute(:admin, 1)
               user.custom_field_values.each do |field|
-                if field.custom_field.name == 'casAdmin'
-                  field.value = true
-                end
+                field.value = true if field.custom_field.name == 'casAdmin'
               end
-              return cas_user_not_created(user) if !user.save
+              return cas_user_not_created(user) unless user.save
+
               user.reload
             else
               # Only revoke admin permissions if they were set via cas
               # We currently save the value for the casAdmin Field as `true` or `false`. However, redmine saves them as `1` and `0`. We need to support both.
               wasCreatedByCAS = user.custom_field_value(casAdminPermissionsCustomField).is_true?
-              if wasCreatedByCAS
-                user.update_attribute(:admin, 0)
-              end
+              user.update_attribute(:admin, 1) if wasCreatedByCAS
               user.custom_field_values.each do |field|
-                if field.custom_field.name == 'casAdmin'
-                  field.value = false
-                end
+                field.value = true if field.custom_field.name == 'casAdmin'
               end
-              return cas_user_not_created(user) if !user.save
+              return cas_user_not_created(user) unless user.save
+
               user.reload
             end
             casAdminPermissionsCustomField.validate_custom_field
