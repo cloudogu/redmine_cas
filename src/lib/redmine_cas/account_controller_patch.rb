@@ -180,7 +180,7 @@ module RedmineCAS
 
       def cas_user_not_created(user)
         logger.error "Could not auto-create user: #{user.errors.full_messages.to_sentence}"
-        render_403 :message => l(:redmine_cas_user_not_created, :user => session[:cas_user])
+        render_403 :message => l(:redmine_cas_user_not_created, :user => session[:cas_user], :reason => user.errors.full_messages.to_sentence)
       end
 
     end

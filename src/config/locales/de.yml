@@ -1,4 +1,4 @@
-en:
+de:
   redmine_cas_settings_enabled_label: 'Enabled'
   redmine_cas_settings_redirect_enabled_label: 'Redirect from login'
   redmine_cas_settings_redirect_enabled_description: 'Only used when anonymous access is activated. Once activated, the application login will no longer be shown and the user will always be redirected to the cas login.'
@@ -9,4 +9,4 @@ en:
   redmine_cas_settings_autocreate_users_label: 'Auto-create users'
   redmine_cas_settings_autocreate_users_helptext: 'Automatically create a redmine user if it is successfully authenticated.<br />Will only work if you specify firstname, lastname and mail in the attributes mapping setting above.'
   redmine_cas_user_not_found: '"%{user}" was authenticated but needs to be created in Redmine first.'
-  redmine_cas_user_not_created: '"%{user}" was authenticated but could not be created automatically in Redmine. It must be added manually.<br />Reason:<br />%{reason}'
+  redmine_cas_user_not_created: '"%{user}" wurde authentifiziert konnte aber nicht angelegt werden. Bitte legen Sie den Benutzer manuell an.<br />Ursache:<br />%{reason}'
