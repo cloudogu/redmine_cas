@@ -9,4 +9,4 @@ en:
   redmine_cas_settings_autocreate_users_label: 'Auto-create users'
   redmine_cas_settings_autocreate_users_helptext: 'Automatically create a redmine user if it is successfully authenticated.<br />Will only work if you specify firstname, lastname and mail in the attributes mapping setting above.'
   redmine_cas_user_not_found: '"%{user}" was authenticated but needs to be created in Redmine first.'
-  redmine_cas_user_not_created: '"%{user}" was authenticated but could not be created automatically in Redmine. It must be added manually.'
+  redmine_cas_user_not_created: '"%{user}" was authenticated but could not be created automatically in Redmine. It must be added manually.<br />Reason:<br /><ul><li>%{reason}</li></ul>'

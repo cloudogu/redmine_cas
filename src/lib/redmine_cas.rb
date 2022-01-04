@@ -1,5 +1,6 @@
 require 'casclient'
 require 'casclient/frameworks/rails/filter'
+require 'redmine'
 
 module RedmineCAS
   extend self
@@ -18,12 +19,15 @@ module RedmineCAS
 
   def setup!
     return unless enabled?
+
     CASClient::Frameworks::Rails::Filter.configure(
-      :cas_base_url => setting(:cas_url),
-      :logger => Rails.logger,
-      :validate_url  => setting(:cas_url)+"/p3/proxyValidate",
-      :enable_single_sign_out => single_sign_out_enabled?
+      cas_base_url: setting(:cas_url),
+      logger: Rails.logger,
+      validate_url: setting(:cas_url) + '/p3/proxyValidate',
+      enable_single_sign_out: single_sign_out_enabled?
     )
+    auth_source = AuthSource.find_by_type('AuthSourceCas')
+    create_cas_auth_source if auth_source.nil?
   end
 
   def single_sign_out_enabled?
@@ -41,5 +45,29 @@ module RedmineCAS
       end
     end
     attrs
+  end
+
+  private
+
+  def create_cas_auth_source
+    Rails.logger.warn 'add cas auth source'
+    auth_source = AuthSource.create(
+      type: 'AuthSourceCas',
+      name: 'Cas',
+      host: 'cas.example.com',
+      port: 1234,
+      account: 'myDbUser',
+      account_password: 'myDbPass',
+      base_dn: 'dbAdapter:dbName',
+      attr_login: 'name',
+      attr_firstname: 'firstName',
+      attr_lastname: 'lastName',
+      attr_mail: 'email',
+      onthefly_register: true,
+      tls: false,
+      filter: nil,
+      timeout: nil
+    )
+    auth_source.save
   end
 end

@@ -48,14 +48,14 @@ module RedmineCAS
           end
         end
 
-        return original_find_current_user
+        original_find_current_user
       end
 
       def require_login_with_cas
         return require_login_without_cas unless RedmineCAS.enabled?
 
-        if !User.current.logged?
-          referrer = request.fullpath;
+        unless User.current.logged?
+          referrer = request.fullpath
           respond_to do |format|
             # pass referer to cas action, to work around this problem:
             # https://github.com/ninech/redmine_cas/pull/13#issuecomment-53697288
