@@ -171,18 +171,38 @@ module RedmineCAS
       end
 
       def cas_account_pending
-        render_403 :message => l(:notice_account_pending)
+        render_custom_403 :message => l(:notice_account_pending)
       end
 
       def cas_user_not_found
-        render_403 :message => l(:redmine_cas_user_not_found, :user => session[:cas_user])
+        render_custom_403 :message => l(:redmine_cas_user_not_found, :user => session[:cas_user])
       end
 
       def cas_user_not_created(user)
         logger.error "Could not auto-create user: #{user.errors.full_messages.to_sentence}"
-        render_403 :message => l(:redmine_cas_user_not_created, :user => session[:cas_user], :reason => user.errors.full_messages.to_sentence)
+        render_custom_403 :message => l(:redmine_cas_user_not_created, :user => session[:cas_user], :reason => user.errors.full_messages.to_sentence)
       end
 
+      def render_custom_403(options={})
+        @project = nil
+        render_custom_error({:message => :notice_not_authorized, :status => 403}.merge(options))
+        false
+      end
+
+      def render_custom_error(arg)
+        arg = {:message => arg} unless arg.is_a?(Hash)
+
+        @message = arg[:message]
+        @message = l(@message) if @message.is_a?(Symbol)
+        @status = arg[:status] || 500
+
+        respond_to do |format|
+          format.html do
+            render :template => 'redmine_cas/custom_error', :layout => use_layout, :status => @status
+          end
+          format.any {head @status}
+        end
+      end
     end
   end
 end
