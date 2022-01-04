@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- the `auth_source` registration for the CAS plugin is now part of the plugin setup step (#20)
+- german translations
+- custom error page to be able to render limited html contents
+
+### Changed
+- use `update` instead of `update_attributes` to support rails in version 6+ (#20)
 
 ## [v1.4.6] - 2021-09-08
 ### Fixed
