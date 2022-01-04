@@ -9,4 +9,4 @@ de:
   redmine_cas_settings_autocreate_users_label: 'Benutzer automatisch anlegen'
   redmine_cas_settings_autocreate_users_helptext: 'Legt die Benutzer automatisch an, wenn sie erfolgreich authentifiziert wurden.<br />Dies funktioniert nur, wenn mindestens Vorname, Nachname und E-Mail-Adresse beim Benutzer vorhanden sind.'
   redmine_cas_user_not_found: '"%{user}" wurde authentifiziert, muss aber zuvor in Redmine angelegt werden.'
-  redmine_cas_user_not_created: '"%{user}" wurde authentifiziert, konnte aber nicht angelegt werden. Bitte legen Sie den Benutzer manuell an.<br />Ursache:<br />%{reason}'
+  redmine_cas_user_not_created: '"%{user}" wurde authentifiziert, konnte aber nicht angelegt werden. Bitte legen Sie ihn manuell an.<br />Ursache:<br /><ul><li>%{reason}</li></ul>'
