@@ -26,7 +26,7 @@ class AuthSourceCas < AuthSource
 
   # read required settings from environment
   FQDN = ENV['FQDN']
-  Ces_admin_group = ENV['ADMIN_GROUP']
+  CES_ADMIN_GROUP = ENV['ADMIN_GROUP']
   ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
 
   def add_user_to_group(groupname, user)
@@ -67,7 +67,7 @@ class AuthSourceCas < AuthSource
   def create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, auth_source_id)
     # Get ces admin group
     admin_group_exists = false
-    if Ces_admin_group != ''
+    if CES_ADMIN_GROUP != ''
       admin_group_exists = true
     end
 
@@ -81,7 +81,7 @@ class AuthSourceCas < AuthSource
       user.mail = user_mail
       user.auth_source_id = auth_source_id
       if admin_group_exists
-        if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
+        if user_groups.to_s.include?(CES_ADMIN_GROUP.gsub('\n', ''))
           user.admin = 1
         end
       end
@@ -119,7 +119,7 @@ class AuthSourceCas < AuthSource
       cas_admin_field = UserCustomField.find_by_name('casAdmin')
       created_by_cas = user.custom_field_value(cas_admin_field).is_true?
       if admin_group_exists and created_by_cas
-        if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
+        if user_groups.to_s.include?(CES_ADMIN_GROUP.gsub('\n', ''))
           user.admin = 1
         else
           user.admin = 0
