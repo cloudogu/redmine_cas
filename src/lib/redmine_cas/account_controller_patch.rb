@@ -43,7 +43,7 @@ module RedmineCAS
         if CASClient::Frameworks::Rails::Filter.filter(self)
           user = User.find_by_login(session[:cas_user])
           ces_admin_group = ENV['ADMIN_GROUP']
-          admingroup_exists = !ces_admin_group.nil?
+          admin_group_exists = !ces_admin_group.nil?
 
           # Auto-create user
           if user.nil? && RedmineCAS.autocreate_users?
@@ -95,43 +95,24 @@ module RedmineCAS
           end
           # Grant admin rights to user if he/she is in ces_admin_group
           # Revoke admin rights if they were granted by cas and not granted from a redmine administrator
-          if admingroup_exists
-            # Get custom field which indicates if the admin permissions of the user were set via cas
-            casAdminPermissionsCustomField = UserCustomField.find_by_name('casAdmin')
-            # Create custom field if it doesn't exist yet
-            if casAdminPermissionsCustomField == nil
-              casAdminPermissionsCustomField = UserCustomField.new
-              casAdminPermissionsCustomField.field_format = 'bool'
-              casAdminPermissionsCustomField.name = 'casAdmin'
-              casAdminPermissionsCustomField.description = 'Indicates if admin permissions were granted via cas; do not delete!'
-              casAdminPermissionsCustomField.visible = false
-              casAdminPermissionsCustomField.editable = false
-              casAdminPermissionsCustomField.validate_custom_field
-              casAdminPermissionsCustomField.save!
-            end
-
+          if admin_group_exists
+            cas_admin_field = create_or_update_cas_admin_custom_field
             if @usergroups.include?(ces_admin_group.gsub("\n", ''))
+              # only iterate the users custom fields if the user is no redmine internal admin
+              update_cas_admin_value(user, 1) if is_false?(user.admin)
               user.update_attribute(:admin, 1)
-              user.custom_field_values.each do |field|
-                field.value = true if field.custom_field.name == 'casAdmin'
-              end
-              return cas_user_not_created(user) unless user.save
-
-              user.reload
             else
-              # Only revoke admin permissions if they were set via cas
-              # We currently save the value for the casAdmin Field as `true` or `false`. However, redmine saves them as `1` and `0`. We need to support both.
-              wasCreatedByCAS = user.custom_field_value(casAdminPermissionsCustomField).is_true?
-              user.update_attribute(:admin, 0) if wasCreatedByCAS
-              user.custom_field_values.each do |field|
-                field.value = false if field.custom_field.name == 'casAdmin'
-              end
-              return cas_user_not_created(user) unless user.save
-
-              user.reload
+              # Only revoke admin permissions if they were originally set via CAS
+              created_by_cas = user.custom_field_value(cas_admin_field).is_true?
+              user.update_attribute(:admin, 0) if created_by_cas
+              update_cas_admin_value(user, 0)
             end
-            casAdminPermissionsCustomField.validate_custom_field
-            casAdminPermissionsCustomField.save!
+
+            return cas_user_not_created(user) unless user.save
+            user.reload
+
+            cas_admin_field.validate_custom_field
+            cas_admin_field.save!
           end
 
           return cas_user_not_found if user.nil?
@@ -202,6 +183,35 @@ module RedmineCAS
           end
           format.any {head @status}
         end
+      end
+
+      def is_false?(value)
+        !value || value == false || value.nil? || value.to_s == 'false' || value == 0
+      end
+
+      def update_cas_admin_value(user, new_value)
+        user.custom_field_values.each do |field|
+          field.value = new_value if field.custom_field.name == 'casAdmin'
+        end
+      end
+
+      def create_or_update_cas_admin_custom_field
+        # Get custom field which indicates if the admin permissions of the user were set via cas
+        cas_admin_field = UserCustomField.find_by_name('casAdmin')
+        # Create custom field if it doesn't exist yet
+        if cas_admin_field == nil
+          cas_admin_field = UserCustomField.new
+          cas_admin_field.field_format = 'bool'
+          cas_admin_field.name = 'casAdmin'
+          cas_admin_field.description = 'Indicates if admin permissions were granted via cas; do not delete!'
+        end
+        cas_admin_field.edit_tag_style = 'check_box'
+        cas_admin_field.visible = 0
+        cas_admin_field.editable = 0
+        cas_admin_field.validate_custom_field
+        cas_admin_field.save!
+
+        cas_admin_field
       end
     end
   end

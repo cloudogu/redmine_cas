@@ -66,9 +66,9 @@ class AuthSourceCas < AuthSource
 
   def create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, auth_source_id)
     # Get ces admin group
-    admingroup_exists = false
+    admin_group_exists = false
     if Ces_admin_group != ''
-      admingroup_exists = true
+      admin_group_exists = true
     end
 
     user = User.find_by_login(login)
@@ -80,7 +80,7 @@ class AuthSourceCas < AuthSource
       user.lastname = user_surname
       user.mail = user_mail
       user.auth_source_id = auth_source_id
-      if admingroup_exists
+      if admin_group_exists
         if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
           user.admin = 1
         end
@@ -116,10 +116,9 @@ class AuthSourceCas < AuthSource
       end
 
       # remove user's admin rights if he is not in admin group any more
-      casAdminPermissionsCustomField = UserCustomField.find_by_name('casAdmin')
-      # We currently save the value for the casAdmin Field as `true` or `false`. However, redmine saves them as `1` and `0`. We need to support both.
-      wasCreatedByCAS = user.custom_field_value(casAdminPermissionsCustomField).is_true?
-      if admingroup_exists and wasCreatedByCAS
+      cas_admin_field = UserCustomField.find_by_name('casAdmin')
+      created_by_cas = user.custom_field_value(cas_admin_field).is_true?
+      if admin_group_exists and created_by_cas
         if user_groups.to_s.include?(Ces_admin_group.gsub('\n', ''))
           user.admin = 1
         else
@@ -129,7 +128,7 @@ class AuthSourceCas < AuthSource
       end
     end
 
-    return user
+    user
   end
 
   def authenticate(login, password)
