@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.5.1] - 2022-01-05
+### Fixed
+- CAS users no longer became administrators in general. This issue was introduced with #20.
+- The custom boolean field casAdmin now works as expected so manually configured administrator won't be removed
+after removing the CAS admin group
+
 ## [v1.5.0] - 2022-01-04
 ### Added
 - the `auth_source` registration for the CAS plugin is now part of the plugin setup step (#20)
