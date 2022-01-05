@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- CAS users no longer became administrators in general. This issue was introduced with #20.
+- The custom boolean field casAdmin now works as expected so manually configured administrator won't be removed
+after removing the CAS admin group
 
 ## [v1.5.0] - 2022-01-04
 ### Added
