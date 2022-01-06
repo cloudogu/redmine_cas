@@ -2,6 +2,22 @@ require 'casclient'
 require 'casclient/frameworks/rails/filter'
 require 'redmine'
 
+class String
+  def is_true?()
+    if self == "true" || self == "1"
+      true
+    else
+      false
+    end
+  end
+end
+
+class NilClass
+  def is_true?()
+    true
+  end
+end
+
 module RedmineCAS
   extend self
 
