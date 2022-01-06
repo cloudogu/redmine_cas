@@ -37,8 +37,7 @@ module RedmineCAS
               user_givenName = userAttributes["givenName"]
               user_groups = userAttributes["allgroups"]
 
-              cas_auth_source = AuthSource.find_by(:name => 'Cas')
-              user = cas_auth_source.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, cas_auth_source.id)
+              user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
 
               return user
             end

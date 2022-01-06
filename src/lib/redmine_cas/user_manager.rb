@@ -1,103 +1,108 @@
 module RedmineCAS
   module UserManager
-    def add_user_to_group(groupname, user)
-      begin
-        logger.info "add_user_to_group: " + groupname + ", " + user.to_s
-        @group = Group.find_by(lastname: groupname)
-        if @group == nil
-          # create group and add user
-          create_group_with_user(groupname, user)
-        else
-          logger.info 'group "' + @group.to_s + '" already exists'
+    # read required settings from environment
+    CES_ADMIN_GROUP = ENV['ADMIN_GROUP']
 
-          # if not already: add user to existing group
-          @groupusers = User.active.in_group(@group).all()
-          if not (@groupusers.include?(user))
-            logger.info 'add "' + user.to_s + '" to group ' + @group.to_s
-            @group.users << user
-            @group.save
-          else
-            logger.info '"' + user.to_s + '" is already member of "' + @group.to_s + '"'
-          end
-        end
-      rescue Exception => e
-        logger.info e.message
+    def self.update_cas_admin_value(user, new_value)
+      user.custom_field_values.each do |field|
+        field.value = new_value if field.custom_field.name == 'casAdmin'
       end
     end
 
-    def create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, auth_source_id)
+    def self.add_user_to_group(groupname, user)
+      begin
+        Rails.logger.info "add_user_to_group: " + groupname + ", " + user.to_s
+
+        group = Group.find_by(lastname: groupname)
+        group2 = Group.find_by(lastname: "admin")
+        if group == nil
+          # create group and add user
+          group = Group.new(:lastname => groupname, :firstname => 'cas')
+          group.save!
+        end
+
+        # if not already: add user to existing group
+        group_users = User.active.in_group(group).all()
+        if not (group_users.include?(user))
+          Rails.logger.info 'add "' + user.to_s + '" to group ' + group.to_s
+          group.users << user
+          group.save!
+        else
+          Rails.logger.info '"' + user.to_s + '" is already member of "' + group.to_s + '"'
+        end
+
+      rescue Exception => e
+        Rails.logger.info e.message
+      end
+    end
+
+    def self.create_or_update_user(login, first_name, last_name, mail, user_groups)
+      user = User.find_by_login(login)
+      cas_auth_source = AuthSource.find_by(:name => 'Cas')
+
       # Get ces admin group
       admin_group_exists = false
       if CES_ADMIN_GROUP != ''
         admin_group_exists = true
       end
 
-      user = User.find_by_login(login)
       if user == nil # user not in redmine yet
-
         user = User.new
         user.login = login
-        user.firstname = user_givenName
-        user.lastname = user_surname
-        user.mail = user_mail
-        user.auth_source_id = auth_source_id
-        if admin_group_exists
-          if user_groups.to_s.include?(CES_ADMIN_GROUP.gsub('\n', ''))
-            user.admin = 1
-          end
-        end
+        user.firstname = first_name
+        user.lastname = last_name
+        user.mail = mail
+        user.auth_source_id = cas_auth_source.id unless cas_auth_source.nil?
 
         for i in user_groups
-          # create group / add user to group
-          add_user_to_group(i.to_s, user)
+          self.add_user_to_group(i.to_s, user)
         end unless user_groups.nil?
 
-        if !user.save
-          raise user.errors.full_messages.to_s
-        end
       else
-        # user already in redmine
-        @usergroups = Array.new
-        for i in user_groups
-          @usergroups << i.to_s
-          # create group / add user to group
-          add_user_to_group(i.to_s, user)
-        end unless user_groups.nil?
+        # user already exists
+        self.update_user_groups(user, user_groups)
+      end
 
-        # remove user from groups he is not in any more
-        @casgroups = Group.where(firstname: 'cas')
-        for l in @casgroups
-          @casgroup = Group.find_by(lastname: l.to_s)
-          @casgroupusers = User.active.in_group(@casgroup).all()
-          for m in @casgroupusers
-            if (m.login == login) and not (@usergroups.include?(l.to_s))
-              @casgroup.users.delete(user)
-            end
-          end
-        end
+      if admin_group_exists
+        user_should_be_admin = user_groups.to_s.include?(CES_ADMIN_GROUP.to_s.gsub('\n', ''))
+        cas_admin_field = RedmineCAS.create_or_update_cas_admin_custom_field
+        admin_permissions_set_by_cas = user.custom_field_value(cas_admin_field).is_true?
 
-        # remove user's admin rights if he is not in admin group any more
-        cas_admin_field = UserCustomField.find_by_name('casAdmin')
-        created_by_cas = user.custom_field_value(cas_admin_field).is_true?
-        if admin_group_exists and created_by_cas
-          if user_groups.to_s.include?(CES_ADMIN_GROUP.gsub('\n', ''))
-            user.admin = 1
-          else
-            user.admin = 0
-          end
-          user.save
+        # Grant admin rights to user if he/she is in ces_admin_group
+        # Revoke admin rights if they were granted by cas and not granted from a redmine administrator
+        if user_should_be_admin
+          self.update_cas_admin_value(user, 1) if user.admin.is_false? && user_should_be_admin
+          user.update_attribute(:admin, 1)
+        else
+          self.update_cas_admin_value(user, 0) if admin_permissions_set_by_cas
+          user.update_attribute(:admin, 0) if admin_permissions_set_by_cas
         end
+      end
+
+      if !user.save
+        raise user.errors.full_messages.to_s
       end
 
       user
     end
 
-    def create_group_with_user(group, user)
-      logger.info 'create new group "' + group + '" and add member "' + user.to_s + '"'
-      # create group and add user
-      @newgroup = Group.new(:lastname => group, :firstname => 'cas')
-      @newgroup.users << user
-      @newgroup.save!
+    def self.update_user_groups(user, user_groups)
+      for i in user_groups
+        self.add_user_to_group(i.to_s, user)
+      end unless user_groups.nil?
+
+      groups_to_remove = Group.joins(:users)
+                              .left_outer_joins(:groups_users)
+                              .where(groups_users: { user_id: user.id })
+                              .where(users: { firstname: 'cas' })
+                              .where.not(lastname: user_groups)
+                              .distinct
+
+      for group in groups_to_remove
+        group.users.delete(user)
+      end
+
     end
+
   end
 end

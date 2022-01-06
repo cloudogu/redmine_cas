@@ -18,6 +18,12 @@ class NilClass
   end
 end
 
+class BasicObject
+  def is_false?()
+    !self || self == false || self.nil? || self.to_s == 'false' || self == 0
+  end
+end
+
 module RedmineCAS
   extend self
 
@@ -60,8 +66,44 @@ module RedmineCAS
         attrs[key_redmine] = (value.is_a? Array) ? value.first : value
       end
     end
+
+    attrs["login"] =  extra_attributes["username"]
+    attrs["allgroups"] =  extra_attributes["allgroups"]
+
     attrs
   end
+
+  def create_or_update_cas_admin_custom_field
+    # Get custom field which indicates if the admin permissions of the user were set via cas
+    cas_admin_field = UserCustomField.find_by_name('casAdmin')
+    # Create custom field if it doesn't exist yet
+    if cas_admin_field == nil
+      cas_admin_field = UserCustomField.new
+      cas_admin_field.field_format = 'bool'
+      cas_admin_field.name = 'casAdmin'
+      cas_admin_field.description = 'Indicates if admin permissions were granted via cas; do not delete!'
+    end
+    cas_admin_field.edit_tag_style = 'check_box'
+    cas_admin_field.visible = 0
+    cas_admin_field.editable = 0
+    cas_admin_field.validate_custom_field
+    cas_admin_field.save!
+
+    cas_admin_field
+  end
+
+
+  def self.api_request(uri, form_data)
+    http_uri = URI.parse(uri)
+    http = Net::HTTP.new(http_uri.host, http_uri.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    request = Net::HTTP::Post.new(http_uri.path, initheader = { 'Content-Type' => 'application/json' })
+    request.set_form_data(form_data)
+
+    http.request(request)
+  end
+
 
   private
 

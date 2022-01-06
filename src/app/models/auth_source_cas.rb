@@ -13,23 +13,13 @@ class AuthSourceCas < AuthSource
   CES_ADMIN_GROUP = ENV['ADMIN_GROUP']
   ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
 
-  def api_request(uri, form_data)
-    http_uri = URI.parse(uri)
-    http = Net::HTTP.new(http_uri.host, http_uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    request = Net::HTTP::Post.new(http_uri.path, initheader = { 'Content-Type' => 'application/json' })
-    request.set_form_data(form_data)
-    return http.request(request)
-  end
-
   def authenticate(login, password)
     return nil if login.blank? || password.blank?
 
     # request a ticket granting ticket
     tgt_uri = 'https://' + FQDN + '/cas/v1/tickets'
     tgt_form_data = { 'username' => login, 'password' => password }
-    tgt = api_request(tgt_uri, tgt_form_data)
+    tgt = RedmineCAS.api_request(tgt_uri, tgt_form_data)
 
     if tgt.code == '201'
       # get ticket granting ticket from response
@@ -59,7 +49,9 @@ class AuthSourceCas < AuthSource
           user_givenName = userAttributes["givenName"]
           user_groups = userAttributes["allgroups"] unless userAttributes["allgroups"].nil?
 
-          RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, self.id)
+          user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
+          user.update_attribute(:last_login_on, Time.now)
+          user.save
 
           # return new user information
           retVal =
