@@ -49,7 +49,10 @@ module RedmineCAS
 
   private
 
+  # Creates the auth_source used by CAS to identify users created by CAS.
   def create_cas_auth_source
+    # type is the only value which is used by the plugin to assign the CAs auth_source to new users
+    # the other values are just required by the database scheme
     Rails.logger.warn 'add cas auth source'
     auth_source = AuthSource.create(
       type: 'AuthSourceCas',
