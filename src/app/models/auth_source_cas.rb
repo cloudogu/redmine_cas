@@ -51,7 +51,7 @@ class AuthSourceCas < AuthSource
 
           user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
           user.update_attribute(:last_login_on, Time.now)
-          user.save
+          user.save!
 
           # return new user information
           retVal =
@@ -59,7 +59,8 @@ class AuthSourceCas < AuthSource
               :firstname => user_givenName,
               :lastname => user_surname,
               :mail => user_mail,
-              :auth_source_id => self.id
+              :auth_source_id => self.id,
+              :admin => user.admin
             }
           return retVal
         else
