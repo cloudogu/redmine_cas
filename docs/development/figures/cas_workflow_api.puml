@@ -1,0 +1,51 @@
+@startuml
+User -> Redmine : Browser-Request
+activate Redmine
+Redmine -> application_controller : 'user_setup'
+activate application_controller
+application_controller -> application_controller_patch: 'cas_find_current_user'
+activate application_controller_patch
+activate application_controller
+application_controller_patch -> application_controller: 'find_current_user'
+application_controller -> application_controller: 'try_to_autologin'
+activate application_controller
+application_controller -> application_controller: 'try_to_autologin' returns nil
+deactivate application_controller
+application_controller -> application_controller: extract login and password from request (Authorization header)
+application_controller -> user: 'try_to_login(username, password)'
+activate user
+user -> user: 'try_to_login!(username, password)'
+activate user
+user -> user: 'find_by_login(username)'
+activate user
+user -> user: return <user>
+deactivate user
+user -> user_patch: 'check_password_with_cas?'
+activate user_patch
+user_patch -> auth_source_cas: 'authenticate'
+activate auth_source_cas
+auth_source_cas -> auth_source_cas: do cas proxy ticket workflow
+auth_source_cas -> user_manager: 'create_or_update_user'
+activate user_manager
+user_manager -> user_manager: create/update user
+user_manager -> auth_source_cas: return <user>
+deactivate user_manager
+auth_source_cas -> user_patch: return <user>
+deactivate auth_source_cas
+user_patch -> user: return true
+deactivate user_patch
+user -> user: return <user>
+deactivate user
+user -> application_controller: return <user>
+deactivate user
+application_controller -> application_controller_patch: return <user>
+deactivate application_controller
+application_controller_patch -> application_controller: return <user>
+application_controller -> Redmine: User.curent=<user>
+Redmine -> User: Show requested page
+@enduml
+
+/'
+EcoSystem plantuml link:
+https://ecosystem.cloudogu.com/plantuml/uml/hLNDJlCm4BpdAPOJ8F5ph_Zu18y0wjaophQncjfXRHFAqxDsMfAcSH5LRx6pCxEUNQ_d3Wbk7-45oxKs23Du9jlovkqBlWTqlf3Awm_fSHTIx48P9PkcrafwROrGrdYoTSryCxWCJ24S-j1SzWpJuKM69Sil6kbLnI9AEh7GfXGg4A7n8gh-gjV1Jyog0-TpuwocClhZ2Pd5qqPuAsJmjhPBRSvluvG849UCZ0EZwwB4yqlYfoTcXIG7qfJGIETQIoKioAvPFtKTN3q5NrdINua2AfGbqlKHmMXqVw94VnNtZ5pZpO_8zS36-BS8BWk_E06VQl-s6Ud_WkeyXuUuUXowVX3RTtw5QYLsMObM-qhmRVW_4jgsUl-PIiFE2cS3AOmOPeixtApHM1pssNvWCLfFSfKMug-6xES6c7657ZZ5rQAsxHH1IcqjZLmc_nGXAmjB8ZHb_1hTw65uCLmSSdLKznrFR-KGS93zqKhywEQEiIrEbcJivtvPzdh1Ky03_RwOV-sTt6qyZZvrBkSDEE-atTV9Pxjzi6Omvy0xdipSw_-sgC5ZDa-6lbQstKqXZDDfYTy0
+'/

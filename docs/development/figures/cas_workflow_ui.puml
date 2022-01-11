@@ -1,0 +1,82 @@
+@startuml
+User -> Redmine : Browser-Request
+activate Redmine
+Redmine -> application_controller : 'user_setup'
+activate application_controller
+application_controller -> application_controller_patch: 'cas_find_current_user'
+activate application_controller_patch
+activate application_controller
+application_controller_patch -> application_controller: 'find_current_user'
+activate application_controller
+application_controller -> application_controller: 'try_to_autologin'
+application_controller -> application_controller: 'try_to_autologin' returns nil
+deactivate application_controller
+application_controller -> application_controller_patch: 'find_current_user' returns nil
+deactivate application_controller
+application_controller_patch -> application_controller: 'cas_find_current_user' returns nil
+deactivate application_controller_patch
+application_controller -> Redmine: User.current = nil
+application_controller -> Redmine: end of 'user_setup' (void return)
+deactivate application_controller
+Redmine -> Redmine: before_action hook (check_if_login_required)
+Redmine -> application_controller_patch : 'cas_check_if_login_required'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'check_if_login_required'
+activate application_controller
+application_controller -> application_controller_patch: 'require_login_with_cas'
+deactivate application_controller
+application_controller_patch -> Redmine: Redirect to action (account_controller_patch::cas)
+deactivate application_controller_patch
+Redmine -> application_controller : 'user_setup'
+activate application_controller
+application_controller -> application_controller_patch: 'cas_find_current_user'
+activate application_controller_patch
+activate application_controller
+application_controller_patch -> application_controller: 'find_current_user'
+activate application_controller
+application_controller -> application_controller: 'try_to_autologin'
+application_controller -> application_controller: 'try_to_autologin' returns nil
+deactivate application_controller
+application_controller -> application_controller_patch: 'find_current_user' returns nil
+deactivate application_controller
+application_controller_patch -> application_controller: 'cas_find_current_user' returns nil
+deactivate application_controller_patch
+application_controller -> Redmine: User.current = nil
+application_controller -> Redmine: end of 'user_setup' (void return)
+deactivate application_controller
+Redmine -> application_controller_patch: 'cas'
+activate application_controller_patch
+application_controller_patch -> Redmine
+deactivate application_controller_patch
+Redmine -> Redmine: 'CASClient::Frameworks::Rails::Filter' handles redirect
+note over Redmine: The filter is registered at app startup in 'redmine_cas::setup!'
+Redmine -> User: Redirect to cas login url
+deactivate Redmine
+User -> User: Do cas Workflow (enter credentials, ...)
+User -> Redmine: Browser request containing cas-ST
+activate Redmine
+Redmine -> Redmine: Validate ST and add user attributes to session
+Redmine -> account_controller_patch: 'cas'
+activate account_controller_patch
+account_controller_patch -> user_manager: 'create_or_update_user'
+activate user_manager
+user_manager -> user_manager: create/update user
+user_manager -> account_controller_patch: 'create_or_update_user' returns the created/updated user
+deactivate user_manager
+account_controller_patch -> application_controller: 'logged_user='
+activate application_controller
+application_controller -> application_controller: destroy session
+application_controller -> Redmine: User.current=user
+application_controller -> account_controller_patch: return
+deactivate application_controller
+account_controller_patch -> account_controller_patch: 'redirect_to_ref_or_default'
+account_controller_patch -> Redmine: return
+deactivate account_controller_patch
+Redmine -> User: Render page with correct user
+deactivate Redmine
+@enduml
+
+/'
+EcoSystem plantuml link:
+https://ecosystem.cloudogu.com/plantuml/uml/xLPDZzem4BtdLqnF0QdGUwIjr6wrFu2FzcXvOuTO63kr7T3--uvZay92Ga3iOILEcoKpxutVpBnuQRc1oNUOSROHYaC6FutUuO-J6VzRS-iIcZknfOxlGv9zA6RHgf8YfqveHNAjdD5I8bu6QOqGn79NL-b_XFFXIGTA9pwfgCjB9Ccf9OLGZEIrCLmvubalyeNq6wiAoTsrOLNNLtIr0iZYp1jncj3QQQbNGgLt0G63BJFAWX8oOVp3EdUgqLsO1tJd_CnSnxwVeCxJnnN9O8dWqyW4JmtwW2ok6EZYQ8bWjDM2nJB70mGwsD8MzvKNsd3YKxM2KkirZFAIvsiY2j8C036uzS9mDhwyvb7ig6a7pk1jlAcV3VcDnBSFRwI8X3lXIe8Af7UOshPJ-80CkGEd8RPhHFDSrpYm9nLbo3uUFBKF-txOzyE-Fv5zNzwYUvdi_ePtWvMqXq-VVyoVfK31ikp5q0tVQREsMJQZGkAV5o6TRrX95PFSeYB1w1AbaKrlKSeMQb5oA9fu43vo9Im-SmRK-Rh0EcfGN13AUtAJv8quonhDlwI7zVbE7jigHaApDL2Rew7Pgx2CL-EG-Yja_C7J55BlO8GdnFSv4kEJeD9-XUbqEcxJscF42pMOSA46BoCLIgYLHvpC5xrNx1RcDvM2-Q3v0b0ye8o1dp1KmndnMZjK4uzbkRNOhAC1wlfmd0nFHs3IzSAZDrE-eOgkme8QZb146r9Nljpt5deOdXp-SueLeBu5dERTIKBVqSuMqZg5m-4A8Imo13aF9-6erZuDEkqA1sp5MKFzz17V4OO3PVHRs_KhFUsfEN4FRQUyGSOXJjydMtVtzhxWls-65xwDZ1UqbYxjXMoFUQR0hka-OnEAeG0LzXtyzGvNrZIsyNv0OkO_
+'/
