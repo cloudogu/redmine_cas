@@ -114,14 +114,6 @@ module RedmineCAS
           format.any {head @status}
         end
       end
-
-      def is_false?(value)
-        !value || value == false || value.nil? || value.to_s == 'false' || value == 0
-      end
-
-
-
-
     end
   end
 end

@@ -9,21 +9,22 @@ module RedmineCAS
       end
     end
 
-    def self.add_user_to_group(groupname, user)
-      begin
-        Rails.logger.info "add_user_to_group: " + groupname + ", " + user.to_s
+    # Returns the group by name and creates if it does not already exist
+    def self.get_group(groupname)
+      group = Group.find_by(lastname: groupname)
+      return group unless group.nil?
 
-        group = Group.find_by(lastname: groupname)
-        group2 = Group.find_by(lastname: "admin")
-        if group == nil
-          # create group and add user
-          group = Group.new(:lastname => groupname, :firstname => 'cas')
-          group.save!
-        end
+      group = Group.new(:lastname => groupname, :firstname => 'cas')
+      group.save!
+      group
+    end
+
+    def self.add_user_to_group(group, user)
+      begin
+        Rails.logger.debug "add_user_to_group: " + group.to_s + ", " + user.to_s
 
         # if not already: add user to existing group
-        group_users = User.active.in_group(group).all()
-        if not (group_users.include?(user))
+        if User.where(id: user.id).in_group(group).empty?
           Rails.logger.info 'add "' + user.to_s + '" to group ' + group.to_s
           group.users << user
           group.save!
@@ -54,8 +55,9 @@ module RedmineCAS
         user.mail = mail
         user.auth_source_id = cas_auth_source.id unless cas_auth_source.nil?
 
-        for i in user_groups
-          self.add_user_to_group(i.to_s, user)
+        for groupname in user_groups
+          group = self.get_group(groupname)
+          self.add_user_to_group(group, user)
         end unless user_groups.nil?
 
       else
