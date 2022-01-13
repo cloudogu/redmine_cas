@@ -11,15 +11,22 @@ module RedmineCAS
         alias_method :require_login, :require_login_with_cas
         alias_method :original_check_if_login_required, :check_if_login_required
         alias_method :check_if_login_required, :cas_check_if_login_required
-
         alias_method :original_find_current_user, :find_current_user
         alias_method :find_current_user, :cas_find_current_user
+        alias_method :original_user_setup, :user_setup
+        alias_method :user_setup, :cas_user_setup
       end
     end
 
     module InstanceMethods
       FQDN = ENV['FQDN']
       ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
+
+      def cas_user_setup
+        original_user_setup
+        # reload user data so the updated group information will be took into account
+        User.current.reload
+      end
 
       def cas_find_current_user
         if /\AProxyTicket /i.match?(request.authorization.to_s)
