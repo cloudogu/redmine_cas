@@ -10,7 +10,7 @@ module RedmineCAS
 
     module InstanceMethods
       def check_password_with_cas?(clear_password)
-        return original_check_password? unless RedmineCAS.enabled?
+        return original_check_password?(clear_password) unless RedmineCAS.enabled?
 
         cas_auth_source = AuthSource.find_by(:name => 'Cas')
         if cas_auth_source.present?
