@@ -89,8 +89,9 @@ module RedmineCAS
     end
 
     def self.update_user_groups(user, user_groups)
-      for i in user_groups
-        self.add_user_to_group(i.to_s, user)
+      for groupname in user_groups
+        group = self.get_group(groupname)
+        self.add_user_to_group(group, user)
       end unless user_groups.nil?
 
       groups_to_remove = Group.joins(:users)
