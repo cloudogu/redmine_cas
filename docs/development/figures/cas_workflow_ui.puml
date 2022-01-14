@@ -1,7 +1,9 @@
 @startuml
 User -> Redmine : Browser-Request
 activate Redmine
-Redmine -> application_controller : 'user_setup'
+Redmine -> application_controller_patch : 'cas_user_setup'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'user_setup'
 activate application_controller
 application_controller -> application_controller_patch: 'cas_find_current_user'
 activate application_controller_patch
@@ -15,8 +17,10 @@ application_controller -> application_controller_patch: 'find_current_user' retu
 deactivate application_controller
 application_controller_patch -> application_controller: 'cas_find_current_user' returns nil
 deactivate application_controller_patch
-application_controller -> Redmine: User.current = nil
-application_controller -> Redmine: end of 'user_setup' (void return)
+application_controller -> application_controller: User.current = nil
+application_controller -> application_controller_patch
+application_controller_patch -> Redmine
+deactivate application_controller_patch
 deactivate application_controller
 Redmine -> Redmine: before_action hook (check_if_login_required)
 Redmine -> application_controller_patch : 'cas_check_if_login_required'
@@ -27,7 +31,9 @@ application_controller -> application_controller_patch: 'require_login_with_cas'
 deactivate application_controller
 application_controller_patch -> Redmine: Redirect to action (account_controller_patch::cas)
 deactivate application_controller_patch
-Redmine -> application_controller : 'user_setup'
+Redmine -> application_controller_patch : 'cas_user_setup'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'user_setup'
 activate application_controller
 application_controller -> application_controller_patch: 'cas_find_current_user'
 activate application_controller_patch
@@ -41,8 +47,10 @@ application_controller -> application_controller_patch: 'find_current_user' retu
 deactivate application_controller
 application_controller_patch -> application_controller: 'cas_find_current_user' returns nil
 deactivate application_controller_patch
-application_controller -> Redmine: User.current = nil
-application_controller -> Redmine: end of 'user_setup' (void return)
+application_controller -> application_controller: User.current = nil
+application_controller -> application_controller_patch
+application_controller_patch -> Redmine
+deactivate application_controller_patch
 deactivate application_controller
 Redmine -> application_controller_patch: 'cas'
 activate application_controller_patch
@@ -78,5 +86,5 @@ deactivate Redmine
 
 /'
 EcoSystem plantuml link:
-https://ecosystem.cloudogu.com/plantuml/uml/xLPDZzem4BtdLqnF0QdGUwIjr6wrFu2FzcXvOuTO63kr7T3--uvZay92Ga3iOILEcoKpxutVpBnuQRc1oNUOSROHYaC6FutUuO-J6VzRS-iIcZknfOxlGv9zA6RHgf8YfqveHNAjdD5I8bu6QOqGn79NL-b_XFFXIGTA9pwfgCjB9Ccf9OLGZEIrCLmvubalyeNq6wiAoTsrOLNNLtIr0iZYp1jncj3QQQbNGgLt0G63BJFAWX8oOVp3EdUgqLsO1tJd_CnSnxwVeCxJnnN9O8dWqyW4JmtwW2ok6EZYQ8bWjDM2nJB70mGwsD8MzvKNsd3YKxM2KkirZFAIvsiY2j8C036uzS9mDhwyvb7ig6a7pk1jlAcV3VcDnBSFRwI8X3lXIe8Af7UOshPJ-80CkGEd8RPhHFDSrpYm9nLbo3uUFBKF-txOzyE-Fv5zNzwYUvdi_ePtWvMqXq-VVyoVfK31ikp5q0tVQREsMJQZGkAV5o6TRrX95PFSeYB1w1AbaKrlKSeMQb5oA9fu43vo9Im-SmRK-Rh0EcfGN13AUtAJv8quonhDlwI7zVbE7jigHaApDL2Rew7Pgx2CL-EG-Yja_C7J55BlO8GdnFSv4kEJeD9-XUbqEcxJscF42pMOSA46BoCLIgYLHvpC5xrNx1RcDvM2-Q3v0b0ye8o1dp1KmndnMZjK4uzbkRNOhAC1wlfmd0nFHs3IzSAZDrE-eOgkme8QZb146r9Nljpt5deOdXp-SueLeBu5dERTIKBVqSuMqZg5m-4A8Imo13aF9-6erZuDEkqA1sp5MKFzz17V4OO3PVHRs_KhFUsfEN4FRQUyGSOXJjydMtVtzhxWls-65xwDZ1UqbYxjXMoFUQR0hka-OnEAeG0LzXtyzGvNrZIsyNv0OkO_
+https://ecosystem.cloudogu.com/plantuml/uml/xLTDRzim3BtxLt0dfy2ItGramDQXFo0Vsr5G9JaMeaYU93VelnybErxIn4uS93tbLBSc-SX7yh5UEc5X_1rcWc-a5f31Jsks-CVnJFojXFC9PLw-KIzs9idE5BreMIh9g9T64sQqjqOfOKb9FIimLCge8nK68qxugap_n-fpJ7gZTg86l05O7IZdgcgAogNcX5NM2krZXHVNTbLMvsh7h8PdD9W1HF7sdNX3QEMDCYkfqvi40Oijizg1bYhXucwTE-Re9iWNTEVqp0n3xzsEFlGbOaqQO9X6iEieXBC4x3JYqcBEKxwdDirZ1gyYDrQGu6eq5CQiOSGAmTP4vYIE5B6eNj8A_ZHKhZhYt5-xhWM-VXqQY0PmAtr1a87q1dlGTWeV485vy0QQTeqeOwR25JZAA4Fqfuj7vt667cVeSOOUP-ZJpz3vlRoLmWmjuzIjJ9z_p9-LHCwpxCNIZTWQktPPDgDIuOyNgNmOWO9gheJ3KQW5Ez46qSmRTgCDjIW4vD4UPB1SIOVFWWFr8IzmdbhKF90wt9Re50vAbaKf_9BkvnU6uV0ye2N4FOJA7epXZeLbywbIk_wgFVvWDRaoMnXXXVYU8J0-IQhSLvXC9a-jMrj6yu43jlx0WK0ZbLhgLOWudYzwFtdQCB-faZmOpHU0v07b7C8w8HlUojVA8vjObXFEORCE1gZh01uDJuTXqlKYH8_7PqCrNTKhRmM68iQIgWpfVXJbVVDa_vVZM7MeRtMS-Ex8eQ-qaucqskDnk6eJtY3KTEvFma6kVHnq2Y0Es4hm23sznsNYE53MlBTTxuxGpj6-B4vZnJsmdVJMD5voE_few-xUJXV2nRGY3sta8gULycbloBRC4mbsJVS9cT0S2IYnxn3-JSMLjL4sFWv8u_aF
 '/
