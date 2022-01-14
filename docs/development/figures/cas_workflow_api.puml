@@ -1,0 +1,60 @@
+@startuml
+User -> Redmine : Browser-Request
+activate Redmine
+Redmine -> application_controller_patch : 'cas_user_setup'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'user_setup'
+activate application_controller
+application_controller -> application_controller_patch: 'cas_find_current_user'
+activate application_controller_patch
+application_controller_patch -> application_controller: 'find_current_user'
+activate application_controller
+application_controller -> application_controller: 'try_to_autologin'
+activate application_controller
+application_controller -> application_controller: 'try_to_autologin' returns nil
+deactivate application_controller
+application_controller -> application_controller: extract login and password from request (Authorization header)
+application_controller -> user: 'try_to_login(username, password)'
+activate user
+user -> user: 'try_to_login!(username, password)'
+activate user
+user -> user: 'find_by_login(username)'
+activate user
+user -> user: return <user>
+deactivate user
+user -> user_patch: 'check_password_with_cas?'
+activate user_patch
+user_patch -> auth_source_cas: 'authenticate'
+activate auth_source_cas
+auth_source_cas -> auth_source_cas: do cas proxy ticket workflow
+auth_source_cas -> user_manager: 'create_or_update_user'
+activate user_manager
+user_manager -> user_manager: create/update user
+user_manager -> auth_source_cas: return <user>
+deactivate user_manager
+auth_source_cas -> user_patch: return <user>
+deactivate auth_source_cas
+user_patch -> user: return true
+deactivate user_patch
+user -> user: return <user>
+deactivate user
+user -> application_controller: return <user>
+deactivate user
+application_controller -> application_controller_patch: return <user>
+deactivate application_controller
+application_controller_patch -> application_controller: return <user>
+deactivate application_controller_patch
+application_controller -> application_controller: User.curent=<user>
+application_controller -> application_controller_patch
+deactivate application_controller
+application_controller_patch -> application_controller_patch: User.reload
+application_controller_patch -> Redmine
+deactivate application_controller_patch
+Redmine -> User: Show requested page
+deactivate Redmine
+@enduml
+
+/'
+EcoSystem plantuml link:
+https://ecosystem.cloudogu.com/plantuml/uml/lPR1Rjim38RlVWhjr1POjtlHTTWUeKFEWYeniH17z2XfRlRqfHIxTfpQgODrDyiM_q_yIH5UUI1n-o0UmUoi0t4dVX8s_FBs4Nv7yA5GEjW_Aa2tfUYsSfIgwyfg5ImwgT45mge2ahKAkcIfAwsyZ2mcFOHON_LQSu75hEeaDV4Mi2Oevx9garfRPwIEHE12pl1ZSsFgSkBY39aIQ2y3IXK3LhYnxlz01779o7dXR5KO-FT8U0x4gYBZX796rChx1ic8DU6E-RdNnVMF64ea-pTBY1AK0RgP0QP2z1bb-UlqpgaTV7w5t0niJ5-Bw2V3FrqGdtlZQJ_YduawU2xkq-fXwFh9thxpIz1RsPrADZQKac_3zn6eRVN-CPU6dPKU8sb8CQoMtd0p9sDXs6V76ulH-aqjWo9zgWcVzu8Ljn047t6xhh1vIo0VRQUSscJ_D06J9PACjKbFe_irt5uC5wTQ1wcl1vtUoc70oUbdA_7AdKgZBSwaoDZFux8SzKAW22VylfXBUsVgDiv7NpgNfmrOCaNEJ-A5dDcvFyTPiVuN7lXyHRwriCki-J0lEkVpIGagLEQiKlSJyLxV1ZyRgznwlqfikdaDQOvlZiJQ_Iy0
+'/

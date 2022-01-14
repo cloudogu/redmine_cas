@@ -1,0 +1,92 @@
+@startuml
+User -> Redmine : Browser-Request
+activate Redmine
+Redmine -> application_controller_patch : 'cas_user_setup'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'user_setup'
+activate application_controller
+application_controller -> application_controller_patch: 'cas_find_current_user'
+activate application_controller_patch
+activate application_controller
+application_controller_patch -> application_controller: 'find_current_user'
+activate application_controller
+application_controller -> application_controller: 'try_to_autologin'
+application_controller -> application_controller: 'try_to_autologin' returns nil
+deactivate application_controller
+application_controller -> application_controller_patch: 'find_current_user' returns nil
+deactivate application_controller
+application_controller_patch -> application_controller: 'cas_find_current_user' returns nil
+deactivate application_controller_patch
+application_controller -> application_controller: User.current = nil
+application_controller -> application_controller_patch
+application_controller_patch -> application_controller_patch: User.reload
+application_controller_patch -> Redmine
+deactivate application_controller_patch
+deactivate application_controller
+Redmine -> Redmine: before_action hook (check_if_login_required)
+Redmine -> application_controller_patch : 'cas_check_if_login_required'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'check_if_login_required'
+activate application_controller
+application_controller -> application_controller_patch: 'require_login_with_cas'
+deactivate application_controller
+application_controller_patch -> Redmine: Redirect to action (account_controller_patch::cas)
+deactivate application_controller_patch
+Redmine -> application_controller_patch : 'cas_user_setup'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'user_setup'
+activate application_controller
+application_controller -> application_controller_patch: 'cas_find_current_user'
+activate application_controller_patch
+activate application_controller
+application_controller_patch -> application_controller: 'find_current_user'
+activate application_controller
+application_controller -> application_controller: 'try_to_autologin'
+application_controller -> application_controller: 'try_to_autologin' returns nil
+deactivate application_controller
+application_controller -> application_controller_patch: 'find_current_user' returns nil
+deactivate application_controller
+application_controller_patch -> application_controller: 'cas_find_current_user' returns nil
+deactivate application_controller_patch
+application_controller -> application_controller: User.current = nil
+application_controller -> application_controller_patch
+application_controller_patch -> application_controller_patch: User.reload
+application_controller_patch -> Redmine
+deactivate application_controller_patch
+deactivate application_controller
+Redmine -> application_controller_patch: 'cas'
+activate application_controller_patch
+application_controller_patch -> Redmine
+deactivate application_controller_patch
+Redmine -> Redmine: 'CASClient::Frameworks::Rails::Filter' handles redirect
+note over Redmine: The filter is registered at app startup in 'redmine_cas::setup!'
+Redmine -> User: Redirect to cas login url
+deactivate Redmine
+User -> User: Do cas Workflow (enter credentials, ...)
+User -> Redmine: Browser request containing cas-ST
+activate Redmine
+Redmine -> Redmine: Validate ST and add user attributes to session
+Redmine -> account_controller_patch: 'cas'
+activate account_controller_patch
+account_controller_patch -> user_manager: 'create_or_update_user'
+activate user_manager
+user_manager -> user_manager: create/update user
+user_manager -> account_controller_patch: 'create_or_update_user' returns the created/updated user
+deactivate user_manager
+account_controller_patch -> application_controller: 'logged_user='
+activate application_controller
+application_controller -> application_controller: destroy session
+application_controller -> Redmine: User.current=user
+application_controller -> account_controller_patch: return
+deactivate application_controller
+account_controller_patch -> account_controller_patch: 'redirect_to_ref_or_default'
+account_controller_patch -> Redmine: return
+deactivate account_controller_patch
+Redmine -> User: Render page with correct user
+deactivate Redmine
+@enduml
+
+/'
+EcoSystem plantuml link:
+https://ecosystem.cloudogu.com/plantuml/uml/xLTDZzem4BtdLqnFOQL2xv6er6wrFu2FzcXvOuTO63krdKNxxpjsFXeM4WY2mqgSC6HctioRyHkojjp0z3iiEDi9nI61dqRlySVfWlyjkNKHJPrueuut9b5ZYbwqAAH8gHDQaLGhPxIKt922kZJ7K75ABIan6B7SbKNyFzQGOpGOjHVLuut0wa4vLrLTL2OK8sbf35SkL7XnRLTbTQvsp6fyHgCPG1HdtedJX9PEIxqHAhv9433OCgCiA24Znk_MkMEERe9yGNTEpymuzC7RCOI-HgnP3Gpp07OTXN0b0Kq3GYA6IqtPsKYDsbnAo_dcTNIhFYRmoZDjEF6kMa6kzHOcQSxJBH4P2SD93EgWC9mzZHM-dZZtLy5hWQ-_M3L43RWNBYV8G7o36zLs2W-8a3fm6kfsJMYQwX8lqr562Q8_NJmwZuNsM6YFXVPOQ9zuePs_uRVIgh5bdDgwyVEFvRCKsBqaUJ5qn_VQR6sIBAYG-F4YfFF3b5F59BSuL9NqHqeZcdx3lhQXLZc7BDY3y9OROV7C6L3dymBhg47r1A7ybWfEVZKbIH3LBt4tFz_DmqM3bX1kD9JcOA0R5jRrwrFb-glo-8FLP5BlOO8LulCKWV4agBHVOJQRFRLkRHdrInUOwgKBF8rKAA4sFk9qkHfy3Ml3_APIC6-qN06I1vGny1SJsN16l9OEsSIoBBSMctKmG7shz6XuUWoZlWS-UbXZEwhefX8Fmp4KqOQKXK_texntpQFkb-DOLQXlLPpmxCXXgBIJYRGgvd2uAXDM8rHqTYVX8DSX3dgb50Timrc0djzZnp4SAAFVswxtHsZdg2kmyr3n06mllHMDbsoX8ThwkzVeWj-zXcU-ZOndj9Gk7WpPbdaYmRxfFY4JYY411VOT_1zUlB8coCR70Qaz_m40
+'/

@@ -1,22 +1,6 @@
 require 'net/http'
 require 'net/https'
 
-class String
-  def is_true?()
-    if self == "true" || self == "1"
-      true
-    else
-      false
-    end
-  end
-end
-
-class NilClass
-  def is_true?()
-    true
-  end
-end
-
 class AuthSourceCas < AuthSource
   NETWORK_EXCEPTIONS = [
     Errno::ECONNABORTED, Errno::ECONNREFUSED, Errno::ECONNRESET,
@@ -29,115 +13,13 @@ class AuthSourceCas < AuthSource
   CES_ADMIN_GROUP = ENV['ADMIN_GROUP']
   ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
 
-  def add_user_to_group(groupname, user)
-    begin
-      logger.info "add_user_to_group: " + groupname + ", " + user.to_s
-      @group = Group.find_by(lastname: groupname)
-      if @group == nil
-        # create group and add user
-        create_group_with_user(groupname, user)
-      else
-        logger.info 'group "' + @group.to_s + '" already exists'
-
-        # if not already: add user to existing group
-        @groupusers = User.active.in_group(@group).all()
-        if not (@groupusers.include?(user))
-          logger.info 'add "' + user.to_s + '" to group ' + @group.to_s
-          @group.users << user
-          @group.save
-        else
-          logger.info '"' + user.to_s + '" is already member of "' + @group.to_s + '"'
-        end
-      end
-    rescue Exception => e
-      logger.info e.message
-    end
-  end
-
-  def api_request(uri, form_data)
-    http_uri = URI.parse(uri)
-    http = Net::HTTP.new(http_uri.host, http_uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    request = Net::HTTP::Post.new(http_uri.path, initheader = { 'Content-Type' => 'application/json' })
-    request.set_form_data(form_data)
-    return http.request(request)
-  end
-
-  def create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, auth_source_id)
-    # Get ces admin group
-    admin_group_exists = false
-    if CES_ADMIN_GROUP != ''
-      admin_group_exists = true
-    end
-
-    user = User.find_by_login(login)
-    if user == nil # user not in redmine yet
-
-      user = User.new
-      user.login = login
-      user.firstname = user_givenName
-      user.lastname = user_surname
-      user.mail = user_mail
-      user.auth_source_id = auth_source_id
-      if admin_group_exists
-        if user_groups.to_s.include?(CES_ADMIN_GROUP.gsub('\n', ''))
-          user.admin = 1
-        end
-      end
-
-      for i in user_groups
-        # create group / add user to group
-        add_user_to_group(i.to_s, user)
-      end unless user_groups.nil?
-
-      if !user.save
-        raise user.errors.full_messages.to_s
-      end
-    else
-      # user already in redmine
-      @usergroups = Array.new
-      for i in user_groups
-        @usergroups << i.to_s
-        # create group / add user to group
-        add_user_to_group(i.to_s, user)
-      end unless user_groups.nil?
-
-      # remove user from groups he is not in any more
-      @casgroups = Group.where(firstname: 'cas')
-      for l in @casgroups
-        @casgroup = Group.find_by(lastname: l.to_s)
-        @casgroupusers = User.active.in_group(@casgroup).all()
-        for m in @casgroupusers
-          if (m.login == login) and not (@usergroups.include?(l.to_s))
-            @casgroup.users.delete(user)
-          end
-        end
-      end
-
-      # remove user's admin rights if he is not in admin group any more
-      cas_admin_field = UserCustomField.find_by_name('casAdmin')
-      created_by_cas = user.custom_field_value(cas_admin_field).is_true?
-      if admin_group_exists and created_by_cas
-        if user_groups.to_s.include?(CES_ADMIN_GROUP.gsub('\n', ''))
-          user.admin = 1
-        else
-          user.admin = 0
-        end
-        user.save
-      end
-    end
-
-    user
-  end
-
   def authenticate(login, password)
     return nil if login.blank? || password.blank?
 
     # request a ticket granting ticket
     tgt_uri = 'https://' + FQDN + '/cas/v1/tickets'
     tgt_form_data = { 'username' => login, 'password' => password }
-    tgt = api_request(tgt_uri, tgt_form_data)
+    tgt = RedmineCAS.api_request(tgt_uri, tgt_form_data)
 
     if tgt.code == '201'
       # get ticket granting ticket from response
@@ -148,7 +30,7 @@ class AuthSourceCas < AuthSource
       # request a service ticket
       st_uri = tgticket
       st_form_data = { 'service' => ENDPOINT }
-      serviceTicket = api_request(st_uri, st_form_data)
+      serviceTicket = RedmineCAS.api_request(st_uri, st_form_data)
 
       # successfully got ticket granting ticket?
       if serviceTicket.code == '200'
@@ -167,15 +49,19 @@ class AuthSourceCas < AuthSource
           user_givenName = userAttributes["givenName"]
           user_groups = userAttributes["allgroups"] unless userAttributes["allgroups"].nil?
 
-          create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups, self.id)
+          user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
+          user.update_attribute(:last_login_on, Time.now)
+          user.save!
 
           # return new user information
           retVal =
             {
+              :id => user.id,
               :firstname => user_givenName,
               :lastname => user_surname,
               :mail => user_mail,
-              :auth_source_id => self.id
+              :auth_source_id => self.id,
+              :admin => user.admin
             }
           return retVal
         else
@@ -194,14 +80,6 @@ class AuthSourceCas < AuthSource
 
   def auth_method_name
     'CAS'
-  end
-
-  def create_group_with_user(group, user)
-    logger.info 'create new group "' + group + '" and add member "' + user.to_s + '"'
-    # create group and add user
-    @newgroup = Group.new(:lastname => group, :firstname => 'cas')
-    @newgroup.users << user
-    @newgroup.save!
   end
 
 end

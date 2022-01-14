@@ -9,7 +9,7 @@ Redmine::Plugin.register :redmine_cas do
   name 'Redmine CAS plugin'
   author 'Robert Auer (Cloudogu GmbH)'
   description 'Plugin to CASify your Redmine installation.'
-  version '1.5.1'
+  version '1.5.2'
   url 'https://github.com/cloudogu/redmine_cas'
 
   settings :default => {
@@ -22,6 +22,7 @@ Redmine::Plugin.register :redmine_cas do
   Rails.configuration.to_prepare do
     ApplicationController.send(:include, RedmineCAS::ApplicationControllerPatch)
     AccountController.send(:include, RedmineCAS::AccountControllerPatch)
+    User.send(:include, RedmineCAS::UserPatch)
   end
   ActionDispatch::Callbacks.before do
     RedmineCAS.setup!
