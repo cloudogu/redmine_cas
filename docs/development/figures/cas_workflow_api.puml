@@ -1,7 +1,9 @@
 @startuml
 User -> Redmine : Browser-Request
 activate Redmine
-Redmine -> application_controller : 'user_setup'
+Redmine -> application_controller_patch : 'cas_user_setup'
+activate application_controller_patch
+application_controller_patch -> application_controller : 'user_setup'
 activate application_controller
 application_controller -> application_controller_patch: 'cas_find_current_user'
 activate application_controller_patch
@@ -42,13 +44,17 @@ application_controller -> application_controller_patch: return <user>
 deactivate application_controller
 application_controller_patch -> application_controller: return <user>
 deactivate application_controller_patch
-application_controller -> Redmine: User.curent=<user>
+application_controller -> application_controller: User.curent=<user>
+application_controller -> application_controller_patch
 deactivate application_controller
+application_controller_patch -> application_controller_patch: reload: User.current = User.find_by_login(User.current.login)
+application_controller_patch -> Redmine
+deactivate application_controller_patch
 Redmine -> User: Show requested page
 deactivate Redmine
 @enduml
 
 /'
 EcoSystem plantuml link:
-https://ecosystem.cloudogu.com/plantuml/uml/lPNDJiCm3CVlVGfp0YG6zuaFmIE0Tev2wgtHkgGu2MKyFKwsqQvREueGjtpO_rzYEyxC8S7a7funNsc3C8KdiZKlJfxnBQ3pcLHUlqkFEvDiPyfUigfAhQJNrWXbZITRbgmtXVF04iAX3zLvet3SFEjHwTKNbVIgO8YIJioroOKAH6YyYDIJl8rxDhJPpsRgUEBe6pB5qrfuAsJmjhGBRVu70iGf8-F0w3BByU-H-E69LI7XG9eSAkbSRIc7ETaLyrFLmSLZy8Kb_Paae42P8rqE06CYcXib-OkuPkGAhxuXbwqmnjqik5xtir_ufzfuNNVu9xmsCOVREBjlH_t0jgdy0jLIx4ubQkqBmQ_XeGFQbdepJAdXo0fd0ocCFgmMLxYOOs2nNMVxXbbdVbGhjn2tAh8VQs359NhW8oxdfQsF2QIZhQIHYnG_HSXaOKc4Ae-ZpljgcsVjoQ7MHkfcezE4ikrmSFh1J7np-wwnJKwlI3UU-sdPgmLF0G_uJJB7raxVQnps_crVxW_0c2vokXEFv0ps_TOVE8KP2rvpX-StSVVZMxI-nLbApKjXwrq_mzZd5diftTf_0G00
+https://ecosystem.cloudogu.com/plantuml/uml/lLR9RkCm3BtxApIdDC0qlG-wOEOJMkGiQ2Gc5k98BYNLJR--b6BNIsgd3gPpqqA-HpvIXDOEa5tViqTGUss0_M9_q5PqUFq8pm6SpuJq-aLuQ4oonfIyH5aMMWglhU7I6e-sA01vARpC2MeXXUE1mBW37yf5YpNbc4sYZh96lXbS8opdiggJscYZk0o8O7pAy7jp8zRvZBCp91QF1-uj5y7Rmcwr-Jya3AbaQ1mpkiWK_7jAUFL8g2pHCM4KAuLpbKN5DcZtn9zwdLtz3ZwtgDyI1Cj1AC3b164iH9jHWh-APqRiuUS7oR8ZOxpDWXjr_t61V-gDluS1_ncle-RiDkxkkwgVsBQTduFSyIOgNccVSteD3mEYkjNRPIeDASkT3IWX-X1QFA5cZi92jy_wXjbW_ocMiYnUbMXV3umGT-0PXRZR5BRw3225jXT6R9D-4e6OkKKUIXLNW_VLDS-wcrEi8zJD4QULikjm4lra9JvunzAeYpCACjIpNvPUBtWCSCBV5dDkxuozncdlI-Vok01pfiZvIJoJPtBkJ_6i2Nz50v-Uo5rDTfaqtwP5gtnXXMeZZY6pk-EsFvgw5gjqj3pBtNmxlgfqvtkoJitwbDkgcV0G9_-s1rRRlmC0
 '/
