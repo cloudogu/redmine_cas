@@ -25,7 +25,8 @@ module RedmineCAS
       def cas_user_setup
         original_user_setup
         # reload user data so the updated group information will be took into account
-        User.current.reload
+        # in some cases the call to 'user.reload' ran into errors so we now use this mechanism to make sure it works.
+        User.current = User.find_by_login(User.current.login)
       end
 
       def cas_find_current_user
