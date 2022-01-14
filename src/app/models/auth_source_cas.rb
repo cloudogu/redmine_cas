@@ -56,6 +56,7 @@ class AuthSourceCas < AuthSource
           # return new user information
           retVal =
             {
+              :id => user.id,
               :firstname => user_givenName,
               :lastname => user_surname,
               :mail => user_mail,
