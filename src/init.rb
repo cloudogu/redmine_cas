@@ -22,6 +22,7 @@ Redmine::Plugin.register :redmine_cas do
   Rails.configuration.to_prepare do
     ApplicationController.send(:include, RedmineCAS::ApplicationControllerPatch)
     AccountController.send(:include, RedmineCAS::AccountControllerPatch)
+    User.send(:include, RedmineCAS::UserPatch)
   end
   ActionDispatch::Callbacks.before do
     RedmineCAS.setup!

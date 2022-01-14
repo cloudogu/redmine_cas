@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- a bug where it was not possible for a cas user to login when there was a local user with same name (#21)
+- a bug where the first login try failed when doing an api request (#25)
+
 ## [v1.5.1] - 2022-01-05
 ### Fixed
 - CAS users no longer became administrators in general. This issue was introduced with #20.
