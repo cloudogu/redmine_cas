@@ -1,7 +1,9 @@
 require 'redmine_cas'
-CAS_URL = '/cas/login'
+FQDN = ENV['FQDN']
+CAS_URL = "https://" + FQDN + '/cas/login'
 
 module RedmineCAS
+
   module AccountControllerPatch
     def self.included(base)
       base.send(:include, InstanceMethods)
@@ -15,6 +17,7 @@ module RedmineCAS
 
     module InstanceMethods
       def cas_login
+        return original_login if request.post? && !RedmineCAS.setting(:redirect_enabled)
         return original_login unless RedmineCAS.enabled?
         return unless RedmineCAS.setting(:redirect_enabled)
 
