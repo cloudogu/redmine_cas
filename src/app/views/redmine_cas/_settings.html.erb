@@ -1,24 +1,35 @@
-<p>
-  <%= label_tag "settings[enabled]", l(:redmine_cas_settings_enabled_label) %>
-  <%= check_box_tag "settings[enabled]", 1, @settings[:enabled] %>
-</p>
-<p>
-  <%= label_tag "settings[redirect_enabled]", l(:redmine_cas_settings_redirect_enabled_label) %>
-  <%= check_box_tag "settings[redirect_enabled]", 1, @settings[:redirect_enabled] %>
-  <em class="info"><%= l(:redmine_cas_settings_redirect_enabled_description).html_safe %></em>
-</p>
-<p>
-  <%= label_tag "settings[cas_url]", l(:redmine_cas_settings_cas_url_label) %>
-  <%= text_field_tag "settings[cas_url]", @settings[:cas_url], :size => 50 %>
-  <em class="info"><%= l(:redmine_cas_settings_cas_url_helptext).html_safe %></em>
-</p>
-<p>
-  <%= label_tag "settings[attributes_mapping]", l(:redmine_cas_settings_attributes_mapping_label) %>
-  <%= text_field_tag "settings[attributes_mapping]", @settings[:attributes_mapping], :size => 50 %>
-  <em class="info"><%= l(:redmine_cas_settings_attributes_mapping_helptext, :attribute_names => User.attribute_names.join(', ')).html_safe %></em>
-</p>
-<p>
-  <%= label_tag "settings[autocreate_users]", l(:redmine_cas_settings_autocreate_users_label) %>
-  <%= check_box_tag "settings[autocreate_users]", 1, @settings[:autocreate_users] %>
-  <em class="info"><%= l(:redmine_cas_settings_autocreate_users_helptext).html_safe %></em>
-</p>
+<style>
+    div.cas-plugin-config {
+        margin-left: 150px;
+    }
+</style>
+
+<h1><%= l(:redmine_cas_settings_label).html_safe %></h1>
+<div class="cas-plugin-config">
+  <div>
+    <%= label_tag "settings[enabled]", l(:redmine_cas_settings_enabled_label) %>
+    <%= check_box_tag "settings[enabled]", 1, @settings[:enabled] %>
+    <em class="info">*  <%= l(:redmine_cas_settings_enabled_helptext).html_safe %></em>
+  </div>
+  <div>
+    <label for="FQDN"><%= l(:redmine_cas_settings_cas_url_label).html_safe %></label>
+    <input type="text" id="FQDN" disabled placeholder="<%= ENV['FQDN'] %>"/>
+    <em class="info">* <%= l(:redmine_cas_settings_cas_url_helptext).html_safe %></em>
+  </div>
+  <div>
+    <label for="AdminGroup"><%= l(:redmine_cas_settings_admin_group).html_safe %></label>
+    <input type="text" id="AdminGroup" disabled placeholder="<%= ENV['ADMIN_GROUP'] %>"/>
+    <em class="info">* <%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
+  </div>
+
+  <div>
+    <%= label_tag "settings[disabled_local_user]", l(:redmine_cas_settings_disabled_user_label) %>
+    <%= check_box_tag "settings[disabled_local_user]", 1, @settings[:disabled_local_user], class: "checkbox" %>
+    <em class="info">* <%= l(:redmine_cas_settings_disabled_user_description).html_safe %></em>
+  </div>
+  <div>
+    <%= label_tag "settings[autocreate_users]", l(:redmine_cas_settings_autocreate_users_label) %>
+    <%= check_box_tag "settings[autocreate_users]", 1, @settings[:autocreate_users] %>
+    <em class="info">* <%= l(:redmine_cas_settings_autocreate_users_helptext).html_safe %></em>
+  </div>
+</div>

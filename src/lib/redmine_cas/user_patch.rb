@@ -10,9 +10,8 @@ module RedmineCAS
 
     module InstanceMethods
       def check_password_with_cas?(clear_password)
-        return false if self.auth_source_id == nil && RedmineCAS.setting(:redirect_enabled)
+        return false if self.auth_source_id == nil && RedmineCAS.setting(:disabled_local_user)
         return original_check_password? unless RedmineCAS.enabled?
-
         cas_auth_source = AuthSource.find_by(:name => 'Cas')
         if cas_auth_source.present?
           user = cas_auth_source.authenticate(self.login, clear_password)

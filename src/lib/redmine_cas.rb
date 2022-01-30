@@ -26,6 +26,8 @@ end
 
 module RedmineCAS
   extend self
+  CAS_ATTRIBUTE_MAPPING = {"firstname" => "givenName", "lastname" => "surname", "mail" => "mail"}
+  CAS_BASE_URL = "https://"+ ENV['FQDN'] + "/cas"
 
   def setting(name)
     Setting.plugin_redmine_cas[name]
@@ -43,9 +45,9 @@ module RedmineCAS
     return unless enabled?
 
     CASClient::Frameworks::Rails::Filter.configure(
-      cas_base_url: setting(:cas_url),
+      cas_base_url: CAS_BASE_URL,
       logger: Rails.logger,
-      validate_url: setting(:cas_url) + '/p3/proxyValidate',
+      validate_url: CAS_BASE_URL + '/p3/proxyValidate',
       enable_single_sign_out: single_sign_out_enabled?
     )
     auth_source = AuthSource.find_by_type('AuthSourceCas')
@@ -58,9 +60,8 @@ module RedmineCAS
 
   def user_extra_attributes_from_session(session)
     attrs = {}
-    map = Rack::Utils.parse_nested_query setting(:attributes_mapping)
     extra_attributes = session[:cas_extra_attributes] || {}
-    map.each_pair do |key_redmine, key_cas|
+    CAS_ATTRIBUTE_MAPPING.each_pair do |key_redmine, key_cas|
       value = extra_attributes[key_cas]
       if User.attribute_method?(key_redmine) && value
         attrs[key_redmine] = (value.is_a? Array) ? value.first : value

@@ -3,7 +3,6 @@ FQDN = ENV['FQDN']
 CAS_URL = "https://" + FQDN + '/cas/login'
 
 module RedmineCAS
-
   module AccountControllerPatch
     def self.included(base)
       base.send(:include, InstanceMethods)
@@ -17,9 +16,9 @@ module RedmineCAS
 
     module InstanceMethods
       def cas_login
-        return original_login if request.post? && !RedmineCAS.setting(:redirect_enabled)
+        return original_login if request.post? && !RedmineCAS.setting(:disabled_local_user)
         return original_login unless RedmineCAS.enabled?
-        return unless RedmineCAS.setting(:redirect_enabled)
+        return unless RedmineCAS.setting(:disabled_local_user)
 
         prev_url = request.referrer
         prev_url = home_url if prev_url.to_s.strip.empty?
