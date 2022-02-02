@@ -55,7 +55,7 @@ module RedmineCAS
   end
 
   def self.get_admin_group
-    ENV['ADMIN_GROUP']
+    RedmineCAS.setting(:admin_group)
   end
 
   def enabled?

@@ -11,20 +11,49 @@
     <%= check_box_tag "settings[enabled]", 1, @settings[:enabled] %>
     <em class="info">*  <%= l(:redmine_cas_settings_enabled_helptext).html_safe %></em>
   </div>
-  <div>
-    <label for="FQDN"><%= l(:redmine_cas_settings_cas_url_label).html_safe %></label>
-    <input type="text" id="FQDN" disabled placeholder="<%= ENV['FQDN'] %>"/>
-    <em class="info">* <%= l(:redmine_cas_settings_cas_url_helptext).html_safe %></em>
-  </div>
-  <div>
-    <label for="AdminGroup"><%= l(:redmine_cas_settings_admin_group).html_safe %></label>
-    <input type="text" id="AdminGroup" disabled placeholder="<%= ENV['ADMIN_GROUP'] %>"/>
-    <em class="info">* <%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
-  </div>
+
+
+  <% if ENV['AUTO_MANAGED'] != "true" %>
+    <div>
+      <label for="cas-fqdn"><%= l(:redmine_cas_settings_cas_fqdn_label).html_safe %></label>
+      <input type="text" id="cas-fqdn" placeholder="<%= @settings[:cas_fqdn] %>"/>
+      <em class="info">* <%= l(:redmine_cas_settings_cas_fqdn_helptext).html_safe %></em>
+    </div>
+    <div>
+      <label for="cas-relative"><%= l(:redmine_cas_settings_redmine_fqdn_label).html_safe %></label>
+      <input type="text" id="cas-relative" placeholder="<%= @settings[:redmine_fqdn] %>"/>
+      <em class="info">* <%= l(:redmine_cas_settings_redmine_fqdn_helptext).html_safe %></em>
+    </div>
+    <div>
+      <label for="cas-relative"><%= l(:redmine_cas_settings_cas_relative_label).html_safe %></label>
+      <input type="text" id="cas-relative" placeholder="<%= @settings[:cas_relative_url] %>"/>
+      <em class="info">* <%= l(:redmine_cas_settings_cas_relative_helptext).html_safe %></em>
+    </div>
+    <div>
+      <label for="AdminGroup"><%= l(:redmine_cas_settings_admin_group_label).html_safe %></label>
+      <input type="text" id="AdminGroup" placeholder="<%= @settings[:admin_group] %>"/>
+      <em class="info">* <%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
+    </div>
+  <% end %>
+
+  <% if ENV['AUTO_MANAGED'] == "true" %>
+    <div>
+      <label for="cas-url"><%= l(:redmine_cas_settings_cas_url_label).html_safe %></label>
+      <input type="text" id="cas-fqdn" disabled placeholder="<%= RedmineCAS.get_cas_url %>"/>
+      <em class="info">* <%= l(:redmine_cas_settings_cas_url_helptext).html_safe %></em>
+    </div>
+    <div>
+      <label for="AdminGroup"><%= l(:redmine_cas_settings_admin_group_label).html_safe %></label>
+      <input type="text" id="AdminGroup" disabled placeholder="<%= @settings[:admin_group] %>"/>
+      <em class="info">* <%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
+    </div>
+  <% end %>
 
   <div>
     <%= label_tag "settings[disabled_local_user]", l(:redmine_cas_settings_disabled_user_label) %>
     <%= check_box_tag "settings[disabled_local_user]", 1, @settings[:disabled_local_user], class: "checkbox" %>
     <em class="info">* <%= l(:redmine_cas_settings_disabled_user_description).html_safe %></em>
   </div>
+
+
 </div>
