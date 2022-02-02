@@ -14,6 +14,7 @@ We use our [CAS-Dogu](https://github.com/cloudogu/cas) as CAS server, but it mig
 2. Execute the `bundle/bundle_plugin.rb`-script and place the generated folder in the Redmine `plugins` directory as `redmine_cas`
 3. Configure your redmine environment
    1. Export the "FQDN=xxx"-Environment-Variable: The host where your cas installation is running.
+      1. Note that the CAS must be available under `https://<FQDN>/cas`, otherwise it won't work.
    2. Export the "ADMIN_GROUP=xxx"-Environment-Variable: Users in this group automatically gain admin permissions.
 4. Restart your webserver
 5. Open Redmine and check if the plugin is visible under Administration > Plugins
