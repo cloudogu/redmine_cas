@@ -12,6 +12,8 @@ de:
   redmine_cas_settings_redmine_fqdn_helptext: 'Die FQDN von Redmine.'
   redmine_cas_settings_cas_relative_label: 'CAS-Kontextpfad'
   redmine_cas_settings_cas_relative_helptext: 'Der Kontextpfad des CAS-Servers.'
+  redmine_cas_settings_user_mapping_label: 'Attributmapping'
+  redmine_cas_settings_user_mapping_helptext: 'Das Attributmapping der Redmine-Nutzer=>Cas-Nutzer.'
   redmine_cas_settings_admin_group_label: 'Admin-Gruppe'
   redmine_cas_settings_admin_group_helptext: 'Name der Gruppe, welche automatisch Administrationsrechte in Redmine bekommt.'
   redmine_cas_user_not_found: '"%{user}" wurde authentifiziert, muss aber zuvor in Redmine angelegt werden.'
