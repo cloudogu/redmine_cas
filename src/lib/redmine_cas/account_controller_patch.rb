@@ -14,9 +14,9 @@ module RedmineCAS
 
     module InstanceMethods
       def cas_login
-        return original_login if request.post? && !RedmineCAS.setting(:disabled_local_user)
+        return original_login if request.post? && !RedmineCAS.setting(:local_users_enabled)
         return original_login unless RedmineCAS.enabled?
-        return unless RedmineCAS.setting(:disabled_local_user)
+        return unless RedmineCAS.setting(:local_users_enabled)
 
         prev_url = request.referrer
         prev_url = home_url if prev_url.to_s.strip.empty?

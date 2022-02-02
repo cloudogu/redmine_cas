@@ -73,11 +73,14 @@ secret_key_base: global_key_for_all_env
   - Die beste Lösung für den Fall ist es, Redmine erneut auszuchecken und wieder bei `Redmine-Einrichtung` zu beginnen
 - Die Run-Konfigurationen auswählen und anpassen
   - Richtige ruby-version auswählen
-  - Umgebungsvariablen setzen
-    - FQDN=<path-to-your-local-ecosystem>
-    - ADMIN_GROUP=<your-admin-group>
 - Es sollte in etwa so aussehen:
 ![run-config](figures/getting-started/run-configuration.png)
+- Konfiguration für lokales EcoSystem einrichten
+- `rake redmine_cas:change_setting\[admin_group,<your-admin-group>\]`
+- `rake redmine_cas:change_setting\[redmine_fqdn,192.168.56.2\]`
+- `rake redmine_cas:change_setting\[cas_fqdn,192.168.56.2\]`
+- `rake redmine_cas:change_setting\[cas_relative_url,/cas\]`
+- `rake redmine_cas:change_setting\[enabled,1\]`
 - Jetzt kann über die Run-Konfiguration Redmine gestartet werden, auch im debug-Modus
 
 

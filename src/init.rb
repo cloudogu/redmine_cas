@@ -18,7 +18,7 @@ Redmine::Plugin.register :redmine_cas do
     'redmine_fqdn' => '192.168.56.2',
     'cas_fqdn' => '192.168.56.2',
     'cas_relative_url' => '/cas',
-    'disabled_local_user' => 0,
+    'local_users_enabled' => 1,
     'admin_group' => 'admin',
   }, :partial => 'redmine_cas/settings'
 
