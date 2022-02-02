@@ -16,7 +16,6 @@ Redmine::Plugin.register :redmine_cas do
     'enabled' => false,
     'cas_url' => 'https://',
     'attributes_mapping' => 'firstname=first_name&lastname=last_name&mail=email',
-    'autocreate_users' => false
   }, :partial => 'redmine_cas/settings'
 
   Rails.configuration.to_prepare do

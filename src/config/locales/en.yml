@@ -8,7 +8,5 @@ en:
   redmine_cas_settings_cas_url_helptext: 'Host where the cas server is running. Is set by the environment variable "FQDN".'
   redmine_cas_settings_admin_group: 'Admin-Group'
   redmine_cas_settings_admin_group_helptext: 'Group name that grants cas users administration privileges.'
-  redmine_cas_settings_autocreate_users_label: 'Auto-create users'
-  redmine_cas_settings_autocreate_users_helptext: 'Automatically create a redmine user if it is successfully authenticated.<br />Will only work if you specify firstname, lastname and mail in the attributes mapping setting above.'
   redmine_cas_user_not_found: '"%{user}" was authenticated but needs to be created in Redmine first.'
   redmine_cas_user_not_created: '"%{user}" was authenticated but could not be created automatically in Redmine. It must be added manually.<br />Reason:<br /><ul><li>%{reason}</li></ul>'
