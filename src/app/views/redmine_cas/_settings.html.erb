@@ -55,9 +55,9 @@
   <% end %>
 
   <p>
-    <%= label_tag "settings[disabled_local_user]", l(:redmine_cas_settings_disabled_user_label) %>
+    <%= label_tag "settings[disabled_local_user]", l(:redmine_cas_settings_local_users_enabled_label) %>
     <%= check_box_tag "settings[disabled_local_user]", 1, @settings[:disabled_local_user], class: "checkbox" %>
-    <em class="info">* <%= l(:redmine_cas_settings_disabled_user_description).html_safe %></em>
+    <em class="info">* <%= l(:redmine_cas_settings_local_users_enabled_description).html_safe %></em>
   </p>
 
 
