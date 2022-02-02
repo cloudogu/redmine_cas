@@ -14,7 +14,10 @@ Redmine::Plugin.register :redmine_cas do
 
   settings :default => {
     'enabled' => false,
-    'attributes_mapping' => 'firstname=first_name&lastname=last_name&mail=email',
+    'attributes_mapping' => 'firstname=givenName&lastname=surname&mail=mail&login=username&allgroups=allgroups',
+    'redmine_fqdn' => '192.168.56.2',
+    'cas_fqdn' => '192.168.56.2',
+    'cas_relative_url' => '/cas',
   }, :partial => 'redmine_cas/settings'
 
   Rails.configuration.to_prepare do

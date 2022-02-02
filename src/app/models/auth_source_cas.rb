@@ -8,16 +8,11 @@ class AuthSourceCas < AuthSource
     SocketError
   ]
 
-  # read required settings from environment
-  FQDN = ENV['FQDN']
-  CES_ADMIN_GROUP = ENV['ADMIN_GROUP']
-  ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
-
   def authenticate(login, password)
     return nil if login.blank? || password.blank?
 
     # request a ticket granting ticket
-    tgt_uri = 'https://' + FQDN + '/cas/v1/tickets'
+    tgt_uri = "#{RedmineCAS.get_cas_url}/v1/tickets"
     tgt_form_data = { 'username' => login, 'password' => password }
     tgt = RedmineCAS.api_request(tgt_uri, tgt_form_data)
 
@@ -29,13 +24,13 @@ class AuthSourceCas < AuthSource
       tgticket = forms.to_s[sub, sub2 - sub - 2]
       # request a service ticket
       st_uri = tgticket
-      st_form_data = { 'service' => ENDPOINT }
+      service = RedmineCAS.get_redmine_url
+      st_form_data = { 'service' => service }
       serviceTicket = RedmineCAS.api_request(st_uri, st_form_data)
 
       # successfully got ticket granting ticket?
       if serviceTicket.code == '200'
         ticket = serviceTicket.body
-        service = ENDPOINT
         pt = CASClient::ServiceTicket.new(ticket, service)
         #Validate Service Ticket --> GET /p3/serviceValidate
         validationResponse = CASClient::Frameworks::Rails::Filter.client.validate_service_ticket(pt)
@@ -44,10 +39,11 @@ class AuthSourceCas < AuthSource
         if validationResponse.success
           userAttributes = validationResponse.extra_attributes
 
-          user_mail = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["mail"]]
-          user_surname = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["lastname"]]
-          user_givenName = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["firstname"]]
-          user_groups = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["allgroups"]]
+          mapping=RedmineCAS.get_attribute_mapping
+          user_mail = userAttributes[mapping["mail"]]
+          user_surname = userAttributes[mapping["lastname"]]
+          user_givenName = userAttributes[mapping["firstname"]]
+          user_groups = userAttributes[mapping["allgroups"]]
 
           user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
           user.update_attribute(:last_login_on, Time.now)

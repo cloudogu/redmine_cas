@@ -1,6 +1,4 @@
 require 'redmine_cas'
-FQDN = ENV['FQDN']
-CAS_URL = "https://" + FQDN + '/cas/login'
 
 module RedmineCAS
   module AccountControllerPatch
@@ -22,7 +20,7 @@ module RedmineCAS
 
         prev_url = request.referrer
         prev_url = home_url if prev_url.to_s.strip.empty?
-        login_url = CAS_URL + '?service=' + ERB::Util.url_encode(prev_url)
+        login_url = RedmineCAS.get_cas_url + '/login?service=' + ERB::Util.url_encode(prev_url)
         redirect_to login_url
       end
 

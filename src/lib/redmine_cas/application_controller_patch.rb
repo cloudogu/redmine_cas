@@ -19,9 +19,6 @@ module RedmineCAS
     end
 
     module InstanceMethods
-      FQDN = ENV['FQDN']
-      ENDPOINT = "https://#{FQDN}#{ENV['RAILS_RELATIVE_URL_ROOT']}"
-
       def cas_user_setup
         original_user_setup
         # reload user data so the updated group information will be took into account
@@ -32,7 +29,7 @@ module RedmineCAS
         if /\AProxyTicket /i.match?(request.authorization.to_s)
           begin
             ticket = request.authorization.to_s.split(" ", 2)[1]
-            service = ENDPOINT
+            service = RedmineCAS.get_redmine_url
             pt = CASClient::ServiceTicket.new(ticket, service)
             validationResponse = CASClient::Frameworks::Rails::Filter.client.validate_proxy_ticket(pt)
             if validationResponse.success

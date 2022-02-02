@@ -26,17 +26,36 @@ end
 
 module RedmineCAS
   extend self
-  CAS_ATTRIBUTE_MAPPING = {"firstname" => "givenName", "lastname" => "surname", "mail" => "mail", "login" => "username", "allgroups" => "allgroups"}
-  CAS_BASE_URL = "https://"+ ENV['FQDN'] + "/cas"
 
   def setting(name)
-    Setting.plugin_redmine_cas.to_hash[name]
+    Setting.plugin_redmine_cas[name.to_sym]
   end
 
   def set_setting(name, value)
     settings = Setting.plugin_redmine_cas.to_hash
     settings[name.to_sym] = value
     Setting.set_all_from_params({ plugin_redmine_cas: settings })
+  end
+
+  def self.get_attribute_mapping
+    mapping = RedmineCAS.setting(:attributes_mapping)
+    Rack::Utils.parse_nested_query(mapping)
+  end
+
+  def self.get_cas_url
+    fqdn=RedmineCAS.setting(:cas_fqdn)
+    relative=RedmineCAS.setting(:cas_relative_url)
+    "https://#{fqdn}#{relative}"
+  end
+
+  def self.get_redmine_url
+    fqdn=RedmineCAS.setting(:redmine_fqdn)
+    relative=ENV['RAILS_RELATIVE_URL_ROOT']
+    "https://#{fqdn}#{relative}"
+  end
+
+  def self.get_admin_group
+    ENV['ADMIN_GROUP']
   end
 
   def enabled?
@@ -66,8 +85,9 @@ module RedmineCAS
 
   def user_extra_attributes_from_session(session)
     attrs = {}
+    mapping=self.get_attribute_mapping
     extra_attributes = session[:cas_extra_attributes] || {}
-    CAS_ATTRIBUTE_MAPPING.each_pair do |key_redmine, key_cas|
+    mapping.each_pair do |key_redmine, key_cas|
       value = extra_attributes[key_cas]
       if User.attribute_method?(key_redmine) && value
         attrs[key_redmine] = (value.is_a? Array) ? value.first : value
@@ -96,7 +116,6 @@ module RedmineCAS
     cas_admin_field
   end
 
-
   def self.api_request(uri, form_data)
     http_uri = URI.parse(uri)
     http = Net::HTTP.new(http_uri.host, http_uri.port)
@@ -107,7 +126,6 @@ module RedmineCAS
 
     http.request(request)
   end
-
 
   private
 
