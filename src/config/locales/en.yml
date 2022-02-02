@@ -1,7 +1,6 @@
 en:
   redmine_cas_settings_label: 'Settings'
   redmine_cas_settings_enabled_label: 'Plugin enabled'
-  redmine_cas_settings_enabled_helptext: ''
   redmine_cas_settings_local_users_enabled_label: 'Disable local users'
   redmine_cas_settings_local_users_enabled_description: 'Checked: Only cas users are able to authenticate<br />Unchecked: local users and cas users can be used in parallel, this may lead to inconsistency in the user administration.'
   redmine_cas_settings_redmine_fqdn_label: 'Redmine-FQDN'
