@@ -32,7 +32,7 @@ module RedmineCAS
   end
 
   def set_setting(name, value)
-    settings = Setting.plugin_redmine_cas.to_hash
+    settings = Setting.plugin_redmine_cas
     settings[name.to_sym] = value
     Setting.set_all_from_params({ plugin_redmine_cas: settings })
   end
