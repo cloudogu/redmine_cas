@@ -31,6 +31,23 @@ Effekt: Bei 0 wird der Login mit lokalen Nutzern verboten, bei 1 erlaubt.
 Werte: String
 Effekt: Dieser Wert bestimmt den Gruppennamen einer Gruppe, deren Mitglieder automatisch zum Administrator werden.
 
+## Rake-Task zum Anzeigen / Ändern von Settings
+
+### Änderung
+Mit dem Rake-Task `rake redmine_cas:change_setting\[<key>,<value>\]` Kann eine Einstellung geändert werden.
+Es erscheint ein Output, das ungefähr so aussieht:
+```
+Previous settings value: /cas
+New settings value: /cas2
+```
+
+### Anzeigen
+Mit dem Rake-Task `rake redmine_cas:get_setting\[<key>\]` Kann eine Einstellung angezeigt werden.
+Es erscheint ein Output, das ungefähr so aussieht:
+```
+Setting 'cas_relative_url' => /cas
+```
+
 ## Sonstige Konfiguration
 
 ### ENV['AUTO_MANAGED']

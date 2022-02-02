@@ -7,6 +7,6 @@ namespace :redmine_cas do
   end
 
   task :get_setting, [:key] => [:environment] do | _, args |
-    puts "Setting >#{args.key}<=#{RedmineCAS.setting(args.key.to_sym)}"
+    puts "Setting '#{args.key}' => #{RedmineCAS.setting(args.key.to_sym)}"
   end
 end
