@@ -44,10 +44,10 @@ class AuthSourceCas < AuthSource
         if validationResponse.success
           userAttributes = validationResponse.extra_attributes
 
-          user_mail = userAttributes["mail"]
-          user_surname = userAttributes["surname"]
-          user_givenName = userAttributes["givenName"]
-          user_groups = userAttributes["allgroups"] unless userAttributes["allgroups"].nil?
+          user_mail = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["mail"]]
+          user_surname = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["lastname"]]
+          user_givenName = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["firstname"]]
+          user_groups = userAttributes[RedmineCAS.CAS_ATTRIBUTE_MAPPING["allgroups"]]
 
           user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
           user.update_attribute(:last_login_on, Time.now)

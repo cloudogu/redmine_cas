@@ -26,11 +26,17 @@ end
 
 module RedmineCAS
   extend self
-  CAS_ATTRIBUTE_MAPPING = {"firstname" => "givenName", "lastname" => "surname", "mail" => "mail"}
+  CAS_ATTRIBUTE_MAPPING = {"firstname" => "givenName", "lastname" => "surname", "mail" => "mail", "login" => "username", "allgroups" => "allgroups"}
   CAS_BASE_URL = "https://"+ ENV['FQDN'] + "/cas"
 
   def setting(name)
-    Setting.plugin_redmine_cas[name]
+    Setting.plugin_redmine_cas.to_hash[name]
+  end
+
+  def set_setting(name, value)
+    settings = Setting.plugin_redmine_cas.to_hash
+    settings[name.to_sym] = value
+    Setting.set_all_from_params({ plugin_redmine_cas: settings })
   end
 
   def enabled?
@@ -67,9 +73,6 @@ module RedmineCAS
         attrs[key_redmine] = (value.is_a? Array) ? value.first : value
       end
     end
-
-    attrs["login"] =  extra_attributes["username"]
-    attrs["allgroups"] =  extra_attributes["allgroups"]
 
     attrs
   end
