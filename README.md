@@ -1,19 +1,24 @@
 # Redmine CAS plugin
 
-Plugin to CASify your Redmine installation.
+Plugin to CASify your Redmine installation. 
+This fork is highly optimized to work inside of the [Cloudogu EcoSystem](https://github.com/cloudogu/ecosystem).
 
 ## Compatibility
 
-Tested with Redmine 2.2.x, 2.3.x, 2.4.x and 2.5.x but it should work fine with Redmine 2.x and possibly 1.x.
-We use [CASino](http://casino.rbcas.com) as CAS server, but it might work with others as well.
+Tested with Redmine 3.x.x and 4.x.x but it should work fine with Redmine 2.x and possibly 1.x.
+We use our [CAS-Dogu](https://github.com/cloudogu/cas) as CAS server, but it might work with others as well.
 
 ## Installation
 
-1. Download or clone this repository and place it in the Redmine `plugins` directory as `redmine_cas`
-2. Restart your webserver
-3. Open Redmine and check if the plugin is visible under Administration > Plugins
-4. Follow the "Configure" link and set the parameters
-5. Party
+1. Download or clone this repository
+2. Execute the `bundle/bundle_plugin.rb`-script and place the generated folder in the Redmine `plugins` directory as `redmine_cas`
+3. Configure your redmine environment
+   1. Export the "FQDN=xxx"-Environment-Variable: The host where your cas installation is running.
+   2. Export the "ADMIN_GROUP=xxx"-Environment-Variable: Users in this group automatically gain admin permissions.
+4. Restart your webserver
+5. Open Redmine and check if the plugin is visible under Administration > Plugins
+6. Follow the "Configure" link and set the parameters
+7. Party
 
 ## Development in EcoSystem
 You can use the scripts inside the `dev`-folder to quickly install this plugin 
@@ -21,7 +26,7 @@ You can use the scripts inside the `dev`-folder to quickly install this plugin
 1. Place this repository somewhere inside the EcoSystem
 2. Navigate to the `dev` folder   
 3. Execute `./apply.sh <doguname>` to install this plugin for a dogu (redmine/easyredmine)
-4. If you want to see extended logs, execute `logs.sh <doguname>` 
+4. If you want to see extended logs (production.log), execute `logs.sh <doguname>` 
 
 ### Development with Easyredmine
 Easyredmine and Redmine have different ideas about how an `init.rb` file for a plugin should be structured, especially how the imports of the dependencies for the plugin should be loaded. The `init.rb` in this plugin is tailored for redmine.
@@ -51,10 +56,6 @@ with CAS.
 
 The sessions have to be stored in the database to make Single Sign Out work.
 You can achieve this with a tiny plugin: [redmine_activerecord_session_store](https://github.com/pencil/redmine_activerecord_session_store)
-
-### Auto-create users
-
-By enabling this setting, successfully authenticated users will be automatically added into Redmine if they do not already exist. You *must* define the attribute mapping for at least firstname, lastname and mail attributes for this to work.
 
 ## Copyright
 
