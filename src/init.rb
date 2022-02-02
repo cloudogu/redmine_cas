@@ -13,11 +13,12 @@ Redmine::Plugin.register :redmine_cas do
   url 'https://github.com/cloudogu/redmine_cas'
 
   settings :default => {
-    'enabled' => false,
+    'enabled' => 1,
     'attributes_mapping' => 'firstname=givenName&lastname=surname&mail=mail&login=username&allgroups=allgroups',
     'redmine_fqdn' => '192.168.56.2',
     'cas_fqdn' => '192.168.56.2',
     'cas_relative_url' => '/cas',
+    'disabled_local_user' => 1
   }, :partial => 'redmine_cas/settings'
 
   Rails.configuration.to_prepare do

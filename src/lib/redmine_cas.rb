@@ -28,7 +28,7 @@ module RedmineCAS
   extend self
 
   def setting(name)
-    Setting.plugin_redmine_cas[name.to_sym]
+    Setting[:plugin_redmine_cas][name.to_sym]
   end
 
   def set_setting(name, value)
@@ -70,9 +70,9 @@ module RedmineCAS
     return unless enabled?
 
     CASClient::Frameworks::Rails::Filter.configure(
-      cas_base_url: CAS_BASE_URL,
+      cas_base_url: RedmineCAS.get_cas_url,
       logger: Rails.logger,
-      validate_url: CAS_BASE_URL + '/p3/proxyValidate',
+      validate_url: RedmineCAS.get_cas_url + '/p3/proxyValidate',
       enable_single_sign_out: single_sign_out_enabled?
     )
     auth_source = AuthSource.find_by_type('AuthSourceCas')
