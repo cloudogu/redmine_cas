@@ -89,8 +89,8 @@ module RedmineCAS
     extra_attributes = session[:cas_extra_attributes] || {}
     mapping.each_pair do |key_redmine, key_cas|
       value = extra_attributes[key_cas]
-      if User.attribute_method?(key_redmine) && value
-        attrs[key_redmine] = (value.is_a? Array) ? value.first : value
+      if value
+        attrs[key_redmine] = value
       end
     end
 
