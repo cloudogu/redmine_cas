@@ -11,7 +11,7 @@
 <div class="cas-plugin-config">
   <div>
     <%= label_tag "settings[enabled]", l(:redmine_cas_settings_enabled_label) %>
-    <%= check_box_tag "settings[enabled]", 1, @settings[:enabled] %>
+    <%= check_box_tag "settings[enabled]", 1, @settings[:enabled], :disabled => ENV['AUTO_MANAGED'] == "true" %>
   </div>
 
 
