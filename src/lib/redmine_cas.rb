@@ -28,7 +28,8 @@ module RedmineCAS
   extend self
 
   def setting(name)
-    Setting[:plugin_redmine_cas][name.to_sym]
+    settings=Setting[:plugin_redmine_cas]
+    settings[name.to_sym] || settings[name.to_s]
   end
 
   def set_setting(name, value)
@@ -85,7 +86,7 @@ module RedmineCAS
 
   def user_extra_attributes_from_session(session)
     attrs = {}
-    mapping=self.get_attribute_mapping
+    mapping = self.get_attribute_mapping
     extra_attributes = session[:cas_extra_attributes] || {}
     mapping.each_pair do |key_redmine, key_cas|
       value = extra_attributes[key_cas]

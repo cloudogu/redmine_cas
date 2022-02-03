@@ -94,14 +94,14 @@ module RedmineCAS
         render_custom_403 :message => l(:redmine_cas_user_not_created, :user => session[:cas_user], :reason => user.errors.full_messages.to_sentence)
       end
 
-      def render_custom_403(options={})
+      def render_custom_403(options = {})
         @project = nil
-        render_custom_error({:message => :notice_not_authorized, :status => 403}.merge(options))
+        render_custom_error({ :message => :notice_not_authorized, :status => 403 }.merge(options))
         false
       end
 
       def render_custom_error(arg)
-        arg = {:message => arg} unless arg.is_a?(Hash)
+        arg = { :message => arg } unless arg.is_a?(Hash)
 
         @message = arg[:message]
         @message = l(@message) if @message.is_a?(Symbol)
@@ -111,7 +111,7 @@ module RedmineCAS
           format.html do
             render :template => 'redmine_cas/custom_error', :layout => use_layout, :status => @status
           end
-          format.any {head @status}
+          format.any { head @status }
         end
       end
     end
