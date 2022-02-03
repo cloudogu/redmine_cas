@@ -1,8 +1,8 @@
 de:
   redmine_cas_settings_label: 'Einstellungen'
-  redmine_cas_settings_enabled_label: 'Plugin Aktiviert'
-  redmine_cas_settings_local_users_enabled_label: 'Lokale Nutzer deaktivieren'
-  redmine_cas_settings_local_users_enabled_description: 'Aktiviert: Nur CAS-Nutzer können sich anmelden.<br />Deaktiviert: CAS- und lokale Nutzer können parallel genutzt werden. Achtung, dies kann unter Umständen zu Inkonsistenzen in der Benutzerverwaltung führen.'
+  redmine_cas_settings_enabled_label: 'Plugin aktiviert'
+  redmine_cas_settings_local_users_enabled_label: 'Lokale Nutzer aktiviert'
+  redmine_cas_settings_local_users_enabled_description: 'Deaktiviert: CAS- und lokale Nutzer können parallel genutzt werden. Achtung, dies kann unter Umständen zu Inkonsistenzen in der Benutzerverwaltung führen.<br />Deaktiviert: Nur CAS-Nutzer können sich anmelden.'
   redmine_cas_settings_cas_fqdn_label: 'CAS-FQDN'
   redmine_cas_settings_cas_fqdn_helptext: 'Die FQDN des CAS-Servers.'
   redmine_cas_settings_cas_url_label: 'CAS-URL'
