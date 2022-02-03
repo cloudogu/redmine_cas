@@ -37,8 +37,11 @@ Effekt: Dieser Wert bestimmt den Gruppennamen einer Gruppe, deren Mitglieder aut
 Mit dem Rake-Task `rake redmine_cas:change_setting\[<key>,<value>\]` Kann eine Einstellung geändert werden.
 Es erscheint ein Output, das ungefähr so aussieht:
 ```
+===============================
+Set settings key 'cas_fqdn'
 Previous settings value: /cas
 New settings value: /cas2
+===============================
 ```
 
 ### Anzeigen
