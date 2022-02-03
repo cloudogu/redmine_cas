@@ -1,63 +1,66 @@
 <style>
     div.cas-plugin-config {
-        margin-left: 150px;
+        margin-left: 12em;
+    }
+    h1.headline {
+        margin-bottom: 1em;
     }
 </style>
 
-<h1><%= l(:redmine_cas_settings_label).html_safe %></h1>
+<h1 class="headline"><%= l(:redmine_cas_settings_label).html_safe %></h1>
 <div class="cas-plugin-config">
-  <p>
+  <div>
     <%= label_tag "settings[enabled]", l(:redmine_cas_settings_enabled_label) %>
     <%= check_box_tag "settings[enabled]", 1, @settings[:enabled] %>
-  </p>
+  </div>
 
 
   <% if ENV['AUTO_MANAGED'] != "true" %>
-    <p>
+    <div>
       <%= label_tag "settings[cas_fqdn]", l(:redmine_cas_settings_cas_fqdn_label) %>
       <%= text_field_tag "settings[cas_fqdn]", @settings[:cas_fqdn], :size => 50 %>
       <em class="info"><%= l(:redmine_cas_settings_cas_fqdn_helptext).html_safe %></em>
-    </p>
-    <p>
+    </div>
+    <div>
       <%= label_tag "settings[redmine_fqdn]", l(:redmine_cas_settings_redmine_fqdn_label) %>
       <%= text_field_tag "settings[redmine_fqdn]", @settings[:redmine_fqdn], :size => 50 %>
       <em class="info"><%= l(:redmine_cas_settings_redmine_fqdn_helptext).html_safe %></em>
-    </p>
-    <p>
+    </div>
+    <div>
       <%= label_tag "settings[cas_relative_url]", l(:redmine_cas_settings_cas_relative_label) %>
       <%= text_field_tag "settings[cas_relative_url]", @settings[:cas_relative_url], :size => 50 %>
       <em class="info"><%= l(:redmine_cas_settings_cas_relative_helptext).html_safe %></em>
-    </p>
-    <p>
+    </div>
+    <div>
       <%= label_tag "settings[admin_group]", l(:redmine_cas_settings_admin_group_label) %>
       <%= text_field_tag "settings[admin_group]", @settings[:admin_group], :size => 50 %>
-      <em class="info">* <%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
-    </p>
-    <p>
+      <em class="info"><%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
+    </div>
+    <div>
       <%= label_tag "settings[attributes_mapping]", l(:redmine_cas_settings_user_mapping_label) %>
       <%= text_field_tag "settings[attributes_mapping]", @settings[:attributes_mapping], :size => 50 %>
       <em class="info"><%= l(:redmine_cas_settings_user_mapping_helptext, :attribute_names => User.attribute_names.join(', ')).html_safe %></em>
-    </p>
+    </div>
   <% end %>
 
   <% if ENV['AUTO_MANAGED'] == "true" %>
-    <p>
+    <div>
       <label for="cas-url"><%= l(:redmine_cas_settings_cas_url_label).html_safe %></label>
       <input type="text" id="cas-fqdn" disabled placeholder="<%= RedmineCAS.get_cas_url %>"/>
       <em class="info"><%= l(:redmine_cas_settings_cas_url_helptext).html_safe %></em>
-    </p>
-    <p>
+    </div>
+    <div>
       <label for="AdminGroup"><%= l(:redmine_cas_settings_admin_group_label).html_safe %></label>
       <input type="text" id="AdminGroup" disabled placeholder="<%= @settings[:admin_group] %>"/>
       <em class="info"><%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
-    </p>
+    </div>
   <% end %>
 
-  <p>
+  <div>
     <%= label_tag "settings[disabled_local_user]", l(:redmine_cas_settings_local_users_enabled_label) %>
     <%= check_box_tag "settings[disabled_local_user]", 1, @settings[:disabled_local_user], class: "checkbox" %>
     <em class="info"><%= l(:redmine_cas_settings_local_users_enabled_description).html_safe %></em>
-  </p>
+  </div>
 
 
 </div>
