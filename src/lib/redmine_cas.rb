@@ -35,7 +35,7 @@ module RedmineCAS
   def set_setting(name, value)
     settings = Setting.plugin_redmine_cas
     settings[name.to_sym] = value
-    Setting.set_all_from_params({ plugin_redmine_cas: settings })
+    Setting.set_all_from_params({ plugin_redmine_cas: settings.symbolize_keys })
   end
 
   def self.get_attribute_mapping
