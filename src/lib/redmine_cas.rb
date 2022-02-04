@@ -28,8 +28,8 @@ module RedmineCAS
   extend self
 
   def setting(name)
-    settings = Setting[:plugin_redmine_cas]
-    settings[name.to_sym] || settings[name.to_s]
+    settings = RedmineCAS.get_plugin_settings
+    RedmineCAS.get_value_from_settings(name, {}, settings)
   end
 
   def set_setting(name, value)
@@ -53,8 +53,16 @@ module RedmineCAS
     transformed_settings
   end
 
-  def self.get_value_from_settings(key, settings, fallback)
-    settings[key.to_s] || settings[key.to_sym] || fallback[key.to_s] || fallback[key.to_sym]
+  def self.get_value_from_settings(key, preferred, fallback)
+    settings_s = preferred[key.to_s]
+    settings_sym = preferred[key.to_sym]
+    fallback_s = fallback[key.to_s]
+    fallback_sym = fallback[key.to_sym]
+
+    return settings_s unless settings_s.nil?
+    return settings_sym unless settings_sym.nil?
+    return fallback_s unless fallback_s.nil?
+    return fallback_sym unless fallback_sym.nil?
   end
 
   def self.get_attribute_mapping
