@@ -15,13 +15,11 @@
 
 <h1 class="headline"><%= l(:redmine_cas_settings_label).html_safe %></h1>
 <div class="cas-plugin-config">
-  <div>
-    <%= label_tag "settings[enabled]", l(:redmine_cas_settings_enabled_label) %>
-    <%= check_box_tag "settings[enabled]", 1, RedmineCAS.setting(:enabled), :disabled => ENV['AUTO_MANAGED'] == "true", :class => "theme-correction" %>
-  </div>
-
-
-  <% if ENV['AUTO_MANAGED'] != "true" %>
+  <div <%= (ENV['AUTO_MANAGED'] == "true") ? "hidden" : "" %>>
+    <div>
+      <%= label_tag "settings[enabled]", l(:redmine_cas_settings_enabled_label) %>
+      <%= check_box_tag "settings[enabled]", 1, RedmineCAS.setting(:enabled), :class => "theme-correction" %>
+    </div>
     <div>
       <%= label_tag "settings[cas_fqdn]", l(:redmine_cas_settings_cas_fqdn_label) %>
       <%= text_field_tag "settings[cas_fqdn]", RedmineCAS.setting(:cas_fqdn), :size => 50 %>
@@ -47,9 +45,9 @@
       <%= text_field_tag "settings[attributes_mapping]", RedmineCAS.setting(:attributes_mapping), :size => 50 %>
       <em class="info"><%= l(:redmine_cas_settings_user_mapping_helptext, :attribute_names => User.attribute_names.join(', ')).html_safe %></em>
     </div>
-  <% end %>
+  </div>
 
-  <% if ENV['AUTO_MANAGED'] == "true" %>
+  <div <%= (ENV['AUTO_MANAGED'] != "true") ? "hidden" : "" %>>
     <div>
       <label for="cas-url"><%= l(:redmine_cas_settings_cas_url_label).html_safe %></label>
       <input type="text" id="cas-fqdn" disabled placeholder="<%= RedmineCAS.get_cas_url %>"/>
@@ -60,7 +58,7 @@
       <input type="text" id="AdminGroup" disabled placeholder="<%= RedmineCAS.setting(:admin_group) %>"/>
       <em class="info"><%= l(:redmine_cas_settings_admin_group_helptext).html_safe %></em>
     </div>
-  <% end %>
+  </div>
 
   <div>
     <%= label_tag "settings[local_users_enabled]", l(:redmine_cas_settings_local_users_enabled_label) %>
