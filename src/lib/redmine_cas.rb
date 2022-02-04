@@ -28,14 +28,34 @@ module RedmineCAS
   extend self
 
   def setting(name)
-    settings=Setting[:plugin_redmine_cas]
+    settings = Setting[:plugin_redmine_cas]
     settings[name.to_sym] || settings[name.to_s]
   end
 
   def set_setting(name, value)
-    settings = Setting.plugin_redmine_cas
+    settings = RedmineCAS.get_plugin_settings
     settings[name.to_sym] = value
-    Setting.set_all_from_params({ plugin_redmine_cas: settings.symbolize_keys })
+    Setting.set_all_from_params({ plugin_redmine_cas: settings.to_h.symbolize_keys })
+  end
+
+  def self.get_plugin_settings
+    default_settings = Redmine::Plugin.find(:redmine_cas).settings[:default]
+    settings = Setting[:plugin_redmine_cas]
+    transformed_settings = {
+      :enabled => RedmineCAS.get_value_from_settings(:enabled, settings, default_settings),
+      :attributes_mapping => RedmineCAS.get_value_from_settings(:attributes_mapping, settings, default_settings),
+      :redmine_fqdn => RedmineCAS.get_value_from_settings(:redmine_fqdn, settings, default_settings),
+      :cas_fqdn => RedmineCAS.get_value_from_settings(:cas_fqdn, settings, default_settings),
+      :cas_relative_url => RedmineCAS.get_value_from_settings(:cas_relative_url, settings, default_settings),
+      :local_users_enabled => RedmineCAS.get_value_from_settings(:local_users_enabled, settings, default_settings),
+      :admin_group => RedmineCAS.get_value_from_settings(:admin_group, settings, default_settings),
+    }
+
+    transformed_settings
+  end
+
+  def self.get_value_from_settings(key, settings, fallback)
+    settings[key.to_s] || settings[key.to_sym] || fallback[key.to_s] || fallback[key.to_sym]
   end
 
   def self.get_attribute_mapping
@@ -44,14 +64,14 @@ module RedmineCAS
   end
 
   def self.get_cas_url
-    fqdn=RedmineCAS.setting(:cas_fqdn)
-    relative=RedmineCAS.setting(:cas_relative_url)
+    fqdn = RedmineCAS.setting(:cas_fqdn)
+    relative = RedmineCAS.setting(:cas_relative_url)
     "https://#{fqdn}#{relative}"
   end
 
   def self.get_redmine_url
-    fqdn=RedmineCAS.setting(:redmine_fqdn)
-    relative=ENV['RAILS_RELATIVE_URL_ROOT']
+    fqdn = RedmineCAS.setting(:redmine_fqdn)
+    relative = ENV['RAILS_RELATIVE_URL_ROOT']
     "https://#{fqdn}#{relative}"
   end
 
