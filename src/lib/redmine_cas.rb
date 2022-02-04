@@ -50,7 +50,6 @@ module RedmineCAS
       :local_users_enabled => RedmineCAS.get_value_from_settings(:local_users_enabled, settings, default_settings),
       :admin_group => RedmineCAS.get_value_from_settings(:admin_group, settings, default_settings),
     }
-
     transformed_settings
   end
 
