@@ -63,6 +63,10 @@ module RedmineCAS
         self.update_user_groups(user, user_groups)
       end
 
+      if !user.save
+        raise user.errors.full_messages.to_s
+      end
+
       if admin_group_exists
         user_should_be_admin = user_groups.to_s.include?(ces_admin_group.to_s.gsub('\n', ''))
         cas_admin_field = RedmineCAS.create_or_update_cas_admin_custom_field
@@ -79,9 +83,6 @@ module RedmineCAS
         end
       end
 
-      if !user.save
-        raise user.errors.full_messages.to_s
-      end
 
       user
     end
