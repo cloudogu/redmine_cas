@@ -46,7 +46,7 @@ class AuthSourceCas < AuthSource
           user_groups = userAttributes[mapping["allgroups"]]
 
           user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
-          user.update_attribute(:last_login_on, Time.now)
+          user.last_login_on = Time.now
           user.save!
 
           # return new user information

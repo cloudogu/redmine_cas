@@ -63,10 +63,6 @@ module RedmineCAS
         self.update_user_groups(user, user_groups)
       end
 
-      if !user.save
-        raise user.errors.full_messages.to_s
-      end
-
       if admin_group_exists
         user_should_be_admin = user_groups.to_s.include?(ces_admin_group.to_s.gsub('\n', ''))
         cas_admin_field = RedmineCAS.create_or_update_cas_admin_custom_field
@@ -76,13 +72,16 @@ module RedmineCAS
         # Revoke admin rights if they were granted by cas and not granted from a redmine administrator
         if user_should_be_admin
           self.update_cas_admin_value(user, 1) if user.admin.is_false? && user_should_be_admin
-          user.update_attribute(:admin, 1)
+          user.admin = 1
         else
           self.update_cas_admin_value(user, 0) if admin_permissions_set_by_cas
-          user.update_attribute(:admin, 0) if admin_permissions_set_by_cas
+          user.admin = 0 if admin_permissions_set_by_cas
         end
       end
 
+      if !user.save
+        raise user.errors.full_messages.to_s
+      end
 
       user
     end
