@@ -17,7 +17,7 @@
 <div class="cas-plugin-config">
   <div <%= (ENV['AUTO_MANAGED'] == "true") ? "hidden" : "" %>>
     <div>
-      <input type="hidden" name="settings[enabled]" value=0>
+      <input type="hidden" name="settings[enabled]" value="0">
       <%= label_tag "settings[enabled]", l(:redmine_cas_settings_enabled_label) %>
       <%= check_box_tag "settings[enabled]", 1, @settings[:enabled].to_i > 0, :class => "theme-correction" %>
     </div>
@@ -27,14 +27,14 @@
       <em class="info"><%= l(:redmine_cas_settings_cas_fqdn_helptext).html_safe %></em>
     </div>
     <div>
-      <%= label_tag "settings[cas_relative_url]", l(:redmine_cas_settings_cas_relative_label) %>
-      <%= text_field_tag "settings[cas_relative_url]", @settings[:cas_relative_url], :size => 50 %>
-      <em class="info"><%= l(:redmine_cas_settings_cas_relative_helptext).html_safe %></em>
-    </div>
-    <div>
       <%= label_tag "settings[redmine_fqdn]", l(:redmine_cas_settings_redmine_fqdn_label) %>
       <%= text_field_tag "settings[redmine_fqdn]", @settings[:redmine_fqdn], :size => 50 %>
       <em class="info"><%= l(:redmine_cas_settings_redmine_fqdn_helptext).html_safe %></em>
+    </div>
+    <div>
+      <%= label_tag "settings[cas_relative_url]", l(:redmine_cas_settings_cas_relative_label) %>
+      <%= text_field_tag "settings[cas_relative_url]", @settings[:cas_relative_url], :size => 50 %>
+      <em class="info"><%= l(:redmine_cas_settings_cas_relative_helptext).html_safe %></em>
     </div>
     <div>
       <%= label_tag "settings[admin_group]", l(:redmine_cas_settings_admin_group_label) %>
@@ -62,7 +62,7 @@
   </div>
 
   <div>
-    <input type="hidden" name="settings[local_users_enabled]" value=0>
+    <input type="hidden" name="settings[local_users_enabled]" value="0">
     <%= label_tag "settings[local_users_enabled]", l(:redmine_cas_settings_local_users_enabled_label) %>
     <%= check_box_tag "settings[local_users_enabled]", 1, @settings[:local_users_enabled].to_i > 0, class: "checkbox theme-correction"%>
     <em class="info"><%= l(:redmine_cas_settings_local_users_enabled_description).html_safe %></em>

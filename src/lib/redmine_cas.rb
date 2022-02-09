@@ -86,18 +86,16 @@ module RedmineCAS
     RedmineCAS.setting(:admin_group)
   end
 
-  def self.enabled?
-    return ActiveModel::Type::Boolean.new.cast(RedmineCAS.setting(:enabled)) unless RedmineCAS.setting(:enabled).nil?
-    return false
+  def enabled?
+    setting(:enabled)
   end
 
-  def self.local_user_enabled?
-    return ActiveModel::Type::Boolean.new.cast(RedmineCAS.setting(:local_users_enabled)) unless RedmineCAS.setting(:local_users_enabled).nil?
-    return false
+  def autocreate_users?
+    setting(:autocreate_users)
   end
 
   def setup!
-    return unless RedmineCAS.enabled?
+    return unless enabled?
 
     CASClient::Frameworks::Rails::Filter.configure(
       cas_base_url: RedmineCAS.get_cas_url,
