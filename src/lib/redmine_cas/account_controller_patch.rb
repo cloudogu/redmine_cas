@@ -1,5 +1,4 @@
 require 'redmine_cas'
-CAS_URL = '/cas/login'
 
 module RedmineCAS
   module AccountControllerPatch
@@ -15,12 +14,14 @@ module RedmineCAS
 
     module InstanceMethods
       def cas_login
+
+        return original_login if request.post? && RedmineCAS.local_user_enabled?
         return original_login unless RedmineCAS.enabled?
-        return unless RedmineCAS.setting(:redirect_enabled)
+        return if RedmineCAS.local_user_enabled?
 
         prev_url = request.referrer
         prev_url = home_url if prev_url.to_s.strip.empty?
-        login_url = CAS_URL + '?service=' + ERB::Util.url_encode(prev_url)
+        login_url = RedmineCAS.get_cas_url + '/login?service=' + ERB::Util.url_encode(prev_url)
         redirect_to login_url
       end
 
@@ -47,8 +48,8 @@ module RedmineCAS
           return cas_user_not_found if user.nil?
           return cas_account_pending unless user.active?
 
-          user.update_attribute(:last_login_on, Time.now)
-          user.save
+          user.last_login_on = Time.now
+          user.save!
 
           if RedmineCAS.single_sign_out_enabled?
             # logged_user= would start a new session and break single sign-out
@@ -94,14 +95,14 @@ module RedmineCAS
         render_custom_403 :message => l(:redmine_cas_user_not_created, :user => session[:cas_user], :reason => user.errors.full_messages.to_sentence)
       end
 
-      def render_custom_403(options={})
+      def render_custom_403(options = {})
         @project = nil
-        render_custom_error({:message => :notice_not_authorized, :status => 403}.merge(options))
+        render_custom_error({ :message => :notice_not_authorized, :status => 403 }.merge(options))
         false
       end
 
       def render_custom_error(arg)
-        arg = {:message => arg} unless arg.is_a?(Hash)
+        arg = { :message => arg } unless arg.is_a?(Hash)
 
         @message = arg[:message]
         @message = l(@message) if @message.is_a?(Symbol)
@@ -111,7 +112,7 @@ module RedmineCAS
           format.html do
             render :template => 'redmine_cas/custom_error', :layout => use_layout, :status => @status
           end
-          format.any {head @status}
+          format.any { head @status }
         end
       end
     end

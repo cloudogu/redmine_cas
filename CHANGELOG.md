@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Removed
+- Removed usage of environment variables for fqdn-configuration
+
+### Added
+- Added rake task which allows changing settings for cas plugin. This is very useful for automation
+- Added more configuration
+
+### Changed
+- Changed the functionality of the redirection-flag in the settings. It now disables/enables completely the local user login.
+
+### Fixed
+- Fixed a bug where local users could not login to redmine (#26)
 
 ## [v1.5.2] - 2022-01-14
 ### Fixed

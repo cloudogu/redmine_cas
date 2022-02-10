@@ -28,24 +28,81 @@ module RedmineCAS
   extend self
 
   def setting(name)
-    Setting.plugin_redmine_cas[name]
+    settings = RedmineCAS.get_plugin_settings
+    RedmineCAS.get_value_from_settings(name, {}, settings)
   end
 
-  def enabled?
-    setting(:enabled)
+  def set_setting(name, value)
+    settings = RedmineCAS.get_plugin_settings
+    settings[name.to_sym] = value
+    Setting.set_all_from_params({ plugin_redmine_cas: settings.to_h.symbolize_keys })
   end
 
-  def autocreate_users?
-    setting(:autocreate_users)
+  def self.get_plugin_settings
+    default_settings = Redmine::Plugin.find(:redmine_cas).settings[:default]
+    settings = Setting[:plugin_redmine_cas]
+    transformed_settings = {
+      :enabled => RedmineCAS.get_value_from_settings(:enabled, settings, default_settings),
+      :attributes_mapping => RedmineCAS.get_value_from_settings(:attributes_mapping, settings, default_settings),
+      :redmine_fqdn => RedmineCAS.get_value_from_settings(:redmine_fqdn, settings, default_settings),
+      :cas_fqdn => RedmineCAS.get_value_from_settings(:cas_fqdn, settings, default_settings),
+      :cas_relative_url => RedmineCAS.get_value_from_settings(:cas_relative_url, settings, default_settings),
+      :local_users_enabled => RedmineCAS.get_value_from_settings(:local_users_enabled, settings, default_settings),
+      :admin_group => RedmineCAS.get_value_from_settings(:admin_group, settings, default_settings),
+    }
+    transformed_settings
+  end
+
+  def self.get_value_from_settings(key, preferred, fallback)
+    settings_s = preferred[key.to_s]
+    settings_sym = preferred[key.to_sym]
+    fallback_s = fallback[key.to_s]
+    fallback_sym = fallback[key.to_sym]
+
+    return settings_s unless settings_s.nil?
+    return settings_sym unless settings_sym.nil?
+    return fallback_s unless fallback_s.nil?
+    return fallback_sym unless fallback_sym.nil?
+  end
+
+  def self.get_attribute_mapping
+    mapping = RedmineCAS.setting(:attributes_mapping)
+    Rack::Utils.parse_nested_query(mapping)
+  end
+
+  def self.get_cas_url
+    fqdn = RedmineCAS.setting(:cas_fqdn)
+    relative = RedmineCAS.setting(:cas_relative_url)
+    "https://#{fqdn}#{relative}"
+  end
+
+  def self.get_redmine_url
+    fqdn = RedmineCAS.setting(:redmine_fqdn)
+    relative = ENV['RAILS_RELATIVE_URL_ROOT']
+    "https://#{fqdn}#{relative}"
+  end
+
+  def self.get_admin_group
+    RedmineCAS.setting(:admin_group)
+  end
+
+  def self.enabled?
+    return ActiveModel::Type::Boolean.new.cast(RedmineCAS.setting(:enabled)) unless RedmineCAS.setting(:enabled).nil?
+    return false
+  end
+
+  def self.local_user_enabled?
+    return ActiveModel::Type::Boolean.new.cast(RedmineCAS.setting(:local_users_enabled)) unless RedmineCAS.setting(:local_users_enabled).nil?
+    return false
   end
 
   def setup!
-    return unless enabled?
+    return unless RedmineCAS.enabled?
 
     CASClient::Frameworks::Rails::Filter.configure(
-      cas_base_url: setting(:cas_url),
+      cas_base_url: RedmineCAS.get_cas_url,
       logger: Rails.logger,
-      validate_url: setting(:cas_url) + '/p3/proxyValidate',
+      validate_url: RedmineCAS.get_cas_url + '/p3/proxyValidate',
       enable_single_sign_out: single_sign_out_enabled?
     )
     auth_source = AuthSource.find_by_type('AuthSourceCas')
@@ -58,17 +115,14 @@ module RedmineCAS
 
   def user_extra_attributes_from_session(session)
     attrs = {}
-    map = Rack::Utils.parse_nested_query setting(:attributes_mapping)
+    mapping = self.get_attribute_mapping
     extra_attributes = session[:cas_extra_attributes] || {}
-    map.each_pair do |key_redmine, key_cas|
+    mapping.each_pair do |key_redmine, key_cas|
       value = extra_attributes[key_cas]
-      if User.attribute_method?(key_redmine) && value
-        attrs[key_redmine] = (value.is_a? Array) ? value.first : value
+      if value
+        attrs[key_redmine] = value
       end
     end
-
-    attrs["login"] =  extra_attributes["username"]
-    attrs["allgroups"] =  extra_attributes["allgroups"]
 
     attrs
   end
@@ -92,7 +146,6 @@ module RedmineCAS
     cas_admin_field
   end
 
-
   def self.api_request(uri, form_data)
     http_uri = URI.parse(uri)
     http = Net::HTTP.new(http_uri.host, http_uri.port)
@@ -103,7 +156,6 @@ module RedmineCAS
 
     http.request(request)
   end
-
 
   private
 
