@@ -73,13 +73,13 @@ module RedmineCAS
   def self.get_cas_url
     fqdn = RedmineCAS.setting(:cas_fqdn)
     relative = RedmineCAS.setting(:cas_relative_url)
-    "https://#{fqdn}#{relative}"
+    "https://[#{fqdn}]#{relative}"
   end
 
   def self.get_redmine_url
     fqdn = RedmineCAS.setting(:redmine_fqdn)
     relative = ENV['RAILS_RELATIVE_URL_ROOT']
-    "https://#{fqdn}#{relative}"
+    "https://[#{fqdn}]#{relative}"
   end
 
   def self.get_admin_group
