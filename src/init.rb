@@ -1,9 +1,11 @@
-require 'redmine'
-require 'redmine_cas'
-require 'redmine_cas/application_controller_patch'
-require 'redmine_cas/account_controller_patch'
+RedmineExtensions::Reloader.to_prepare do
+  require 'redmine'
+  require 'redmine_cas'
+  require 'redmine_cas/application_controller_patch'
+  require 'redmine_cas/account_controller_patch'
 
-require_dependency 'redmine_cas_hook_listener'
+  require_dependency 'redmine_cas_hook_listener'
+end
 
 Redmine::Plugin.register :redmine_cas do
   name 'Redmine CAS plugin'
@@ -15,11 +17,8 @@ Redmine::Plugin.register :redmine_cas do
   settings :default => {
     'enabled' => 1,
     'attributes_mapping' => 'firstname=givenName&lastname=surname&mail=mail&login=username&allgroups=allgroups',
-    'redmine_fqdn' => '192.168.56.2',
-    'cas_fqdn' => '192.168.56.2',
     'cas_relative_url' => '/cas',
-    'local_users_enabled' => 1,
-    'admin_group' => 'admin',
+    'local_users_enabled' => 0
   }, :partial => 'redmine_cas/settings'
 
   Rails.configuration.to_prepare do
