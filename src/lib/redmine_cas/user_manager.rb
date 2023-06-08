@@ -1,5 +1,5 @@
-module RedmineCAS
-  module UserManager
+module RedmineCas
+  class UserManager
     def self.update_cas_admin_value(user, new_value)
       user.custom_field_values.each do |field|
         field.value = new_value if field.custom_field.name == 'casAdmin'
@@ -35,7 +35,7 @@ module RedmineCAS
     end
 
     def self.create_or_update_user(login, first_name, last_name, mail, user_groups)
-      ces_admin_group=RedmineCAS.get_admin_group
+      ces_admin_group=RedmineCas.get_admin_group
       user = User.find_by_login(login)
       cas_auth_source = AuthSource.find_by(:name => 'Cas')
 
@@ -65,7 +65,7 @@ module RedmineCAS
 
       if admin_group_exists
         user_should_be_admin = user_groups.to_s.include?(ces_admin_group.to_s.gsub('\n', ''))
-        cas_admin_field = RedmineCAS.create_or_update_cas_admin_custom_field
+        cas_admin_field = RedmineCas.create_or_update_cas_admin_custom_field
         admin_permissions_set_by_cas = user.custom_field_value(cas_admin_field).is_true?
 
         # Grant admin rights to user if he/she is in ces_admin_group

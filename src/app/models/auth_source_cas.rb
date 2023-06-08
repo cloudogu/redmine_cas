@@ -12,9 +12,9 @@ class AuthSourceCas < AuthSource
     return nil if login.blank? || password.blank?
 
     # request a ticket granting ticket
-    tgt_uri = "#{RedmineCAS.get_cas_url}/v1/tickets"
+    tgt_uri = "#{RedmineCas.get_cas_url}/v1/tickets"
     tgt_form_data = { 'username' => login, 'password' => password }
-    tgt = RedmineCAS.api_request(tgt_uri, tgt_form_data)
+    tgt = RedmineCas.api_request(tgt_uri, tgt_form_data)
 
     if tgt.code == '201'
       # get ticket granting ticket from response
@@ -24,9 +24,9 @@ class AuthSourceCas < AuthSource
       tgticket = forms.to_s[sub, sub2 - sub - 2]
       # request a service ticket
       st_uri = tgticket
-      service = RedmineCAS.get_redmine_url
+      service = RedmineCas.get_redmine_url
       st_form_data = { 'service' => service }
-      serviceTicket = RedmineCAS.api_request(st_uri, st_form_data)
+      serviceTicket = RedmineCas.api_request(st_uri, st_form_data)
 
       # successfully got ticket granting ticket?
       if serviceTicket.code == '200'
@@ -39,13 +39,13 @@ class AuthSourceCas < AuthSource
         if validationResponse.success
           userAttributes = validationResponse.extra_attributes
 
-          mapping=RedmineCAS.get_attribute_mapping
+          mapping=RedmineCas.get_attribute_mapping
           user_mail = userAttributes[mapping["mail"]]
           user_surname = userAttributes[mapping["lastname"]]
           user_givenName = userAttributes[mapping["firstname"]]
           user_groups = userAttributes[mapping["allgroups"]]
 
-          user = RedmineCAS::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
+          user = RedmineCas::UserManager.create_or_update_user(login, user_givenName, user_surname, user_mail, user_groups)
           user.last_login_on = Time.now
           user.save!
 

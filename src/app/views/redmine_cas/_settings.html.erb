@@ -51,7 +51,7 @@
   <div <%= (ENV['AUTO_MANAGED'] != "true") ? "hidden" : "" %>>
     <div>
       <label for="cas-url"><%= l(:redmine_cas_settings_cas_url_label).html_safe %></label>
-      <input type="text" id="cas-fqdn" disabled placeholder="<%= RedmineCAS.get_cas_url %>"/>
+      <input type="text" id="cas-fqdn" disabled placeholder="<%= RedmineCas.get_cas_url %>"/>
       <em class="info"><%= l(:redmine_cas_settings_cas_url_helptext).html_safe %></em>
     </div>
     <div>
