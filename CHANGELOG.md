@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Make cas plugin compatible with rails 6 and ruby 3
+- Update rubycas-client to latest version (#29)
+- Use `:prepend` instead of `:include`
+  - This was changed to remove the alias_method usage
+- Remove `require` of lib-packages
+  - In Rails 6 this would otherwise lead into an error
+- Rename some modules
+  - The autoloader in rails 6 expects specific naming
 
 ## [v2.0.0] - 2022-02-10
 ### Removed
