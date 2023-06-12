@@ -103,7 +103,8 @@ module RedmineCas
       cas_base_url: RedmineCas.get_cas_url,
       logger: Rails.logger,
       validate_url: RedmineCas.get_cas_url + '/p3/proxyValidate',
-      enable_single_sign_out: single_sign_out_enabled?
+      enable_single_sign_out: single_sign_out_enabled?,
+      ticket_store: :active_record_ticket_store
     )
     auth_source = AuthSource.find_by_type('AuthSourceCas')
     create_cas_auth_source if auth_source.nil?
