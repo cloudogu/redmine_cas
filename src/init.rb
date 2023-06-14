@@ -17,12 +17,14 @@ Redmine::Plugin.register :redmine_cas do
     'admin_group' => 'admin',
   }, :partial => 'redmine_cas/settings'
 
-  ApplicationController.send(:include, RedmineCas::ApplicationControllerPatch)
-  AccountController.send(:include, RedmineCas::AccountControllerPatch)
-  User.send(:include, RedmineCas::UserPatch)
+  unless Module.const_defined?(:RedmineExtensions) then
+    ApplicationController.send(:include, RedmineCas::ApplicationControllerPatch)
+    AccountController.send(:include, RedmineCas::AccountControllerPatch)
+    User.send(:include, RedmineCas::UserPatch)
 
-  ActionDispatch::Callbacks.before do
-    RedmineCas.setup!
+    ActionDispatch::Callbacks.before do
+      RedmineCas.setup!
+    end
   end
 
 end

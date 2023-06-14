@@ -49,6 +49,7 @@ module RedmineCas
       :cas_relative_url => RedmineCas.get_value_from_settings(:cas_relative_url, settings, default_settings),
       :local_users_enabled => RedmineCas.get_value_from_settings(:local_users_enabled, settings, default_settings),
       :admin_group => RedmineCas.get_value_from_settings(:admin_group, settings, default_settings),
+      :ticket_store => RedmineCas.get_value_from_settings(:ticket_store, settings, default_settings)
     }
     transformed_settings
   end
@@ -86,6 +87,10 @@ module RedmineCas
     RedmineCas.setting(:admin_group)
   end
 
+  def self.get_ticket_store
+    RedmineCas.setting(:ticket_store)
+  end
+
   def self.enabled?
     return ActiveModel::Type::Boolean.new.cast(RedmineCas.setting(:enabled)) unless RedmineCas.setting(:enabled).nil?
     return false
@@ -104,7 +109,7 @@ module RedmineCas
       logger: Rails.logger,
       validate_url: RedmineCas.get_cas_url + '/p3/proxyValidate',
       enable_single_sign_out: single_sign_out_enabled?,
-      ticket_store: :active_record_ticket_store
+      ticket_store: RedmineCas.get_ticket_store
     )
     auth_source = AuthSource.find_by_type('AuthSourceCas')
     create_cas_auth_source if auth_source.nil?
