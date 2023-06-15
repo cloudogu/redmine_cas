@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Make cas plugin compatible with rails 6 and ruby 3
-- Update rubycas-client to latest version (#29)
+- Update rubycas-client to 2.4.0 (#29)
 - Use `:prepend` instead of `:include`
   - This was changed to remove the alias_method usage
 - Remove `require` of lib-packages
