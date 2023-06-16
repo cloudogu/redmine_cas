@@ -5,8 +5,12 @@ This fork is highly optimized to work inside of the [Cloudogu EcoSystem](https:/
 
 ## Compatibility
 
-Tested with Redmine 3.x.x and 4.x.x but it should work fine with Redmine 2.x and possibly 1.x.
+Tested with Redmine 5.0.x, 3.x.x and 4.x.x but it should work fine with Redmine 2.x and possibly 1.x.
 We use our [CAS-Dogu](https://github.com/cloudogu/cas) as CAS server, but it might work with others as well.
+
+### Important
+This plugin requires our updated rubycas-client as the original one was not updated since 2013.
+You can find the updated rubycas-client her: https://github.com/cloudogu/rubycas-client
 
 ## Installation
 
