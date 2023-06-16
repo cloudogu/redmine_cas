@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.1.0] - 2023-06-16
+### Changed
+- Make cas plugin compatible with rails 6 and ruby 3
+- Update rubycas-client to 2.4.0 (#29)
+- Use `:prepend` instead of `:include`
+  - This was changed to remove the alias_method usage
+- Remove `require` of lib-packages
+  - In Rails 6 this would otherwise lead into an error
+- Rename some modules
+  - The autoloader in rails 6 expects specific naming
+
 ## [v2.0.0] - 2022-02-10
 ### Removed
 - Removed usage of environment variables for fqdn-configuration

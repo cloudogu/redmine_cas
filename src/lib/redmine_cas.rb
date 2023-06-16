@@ -24,16 +24,16 @@ class BasicObject
   end
 end
 
-module RedmineCAS
+module RedmineCas
   extend self
 
   def setting(name)
-    settings = RedmineCAS.get_plugin_settings
-    RedmineCAS.get_value_from_settings(name, {}, settings)
+    settings = RedmineCas.get_plugin_settings
+    RedmineCas.get_value_from_settings(name, {}, settings)
   end
 
   def set_setting(name, value)
-    settings = RedmineCAS.get_plugin_settings
+    settings = RedmineCas.get_plugin_settings
     settings[name.to_sym] = value
     Setting.set_all_from_params({ plugin_redmine_cas: settings.to_h.symbolize_keys })
   end
@@ -42,13 +42,14 @@ module RedmineCAS
     default_settings = Redmine::Plugin.find(:redmine_cas).settings[:default]
     settings = Setting[:plugin_redmine_cas]
     transformed_settings = {
-      :enabled => RedmineCAS.get_value_from_settings(:enabled, settings, default_settings),
-      :attributes_mapping => RedmineCAS.get_value_from_settings(:attributes_mapping, settings, default_settings),
-      :redmine_fqdn => RedmineCAS.get_value_from_settings(:redmine_fqdn, settings, default_settings),
-      :cas_fqdn => RedmineCAS.get_value_from_settings(:cas_fqdn, settings, default_settings),
-      :cas_relative_url => RedmineCAS.get_value_from_settings(:cas_relative_url, settings, default_settings),
-      :local_users_enabled => RedmineCAS.get_value_from_settings(:local_users_enabled, settings, default_settings),
-      :admin_group => RedmineCAS.get_value_from_settings(:admin_group, settings, default_settings),
+      :enabled => RedmineCas.get_value_from_settings(:enabled, settings, default_settings),
+      :attributes_mapping => RedmineCas.get_value_from_settings(:attributes_mapping, settings, default_settings),
+      :redmine_fqdn => RedmineCas.get_value_from_settings(:redmine_fqdn, settings, default_settings),
+      :cas_fqdn => RedmineCas.get_value_from_settings(:cas_fqdn, settings, default_settings),
+      :cas_relative_url => RedmineCas.get_value_from_settings(:cas_relative_url, settings, default_settings),
+      :local_users_enabled => RedmineCas.get_value_from_settings(:local_users_enabled, settings, default_settings),
+      :admin_group => RedmineCas.get_value_from_settings(:admin_group, settings, default_settings),
+      :ticket_store => RedmineCas.get_value_from_settings(:ticket_store, settings, default_settings)
     }
     transformed_settings
   end
@@ -66,44 +67,49 @@ module RedmineCAS
   end
 
   def self.get_attribute_mapping
-    mapping = RedmineCAS.setting(:attributes_mapping)
+    mapping = RedmineCas.setting(:attributes_mapping)
     Rack::Utils.parse_nested_query(mapping)
   end
 
   def self.get_cas_url
-    fqdn = RedmineCAS.setting(:cas_fqdn)
-    relative = RedmineCAS.setting(:cas_relative_url)
+    fqdn = RedmineCas.setting(:cas_fqdn)
+    relative = RedmineCas.setting(:cas_relative_url)
     "https://#{fqdn}#{relative}"
   end
 
   def self.get_redmine_url
-    fqdn = RedmineCAS.setting(:redmine_fqdn)
+    fqdn = RedmineCas.setting(:redmine_fqdn)
     relative = ENV['RAILS_RELATIVE_URL_ROOT']
     "https://#{fqdn}#{relative}"
   end
 
   def self.get_admin_group
-    RedmineCAS.setting(:admin_group)
+    RedmineCas.setting(:admin_group)
+  end
+
+  def self.get_ticket_store
+    RedmineCas.setting(:ticket_store)
   end
 
   def self.enabled?
-    return ActiveModel::Type::Boolean.new.cast(RedmineCAS.setting(:enabled)) unless RedmineCAS.setting(:enabled).nil?
+    return ActiveModel::Type::Boolean.new.cast(RedmineCas.setting(:enabled)) unless RedmineCas.setting(:enabled).nil?
     return false
   end
 
   def self.local_user_enabled?
-    return ActiveModel::Type::Boolean.new.cast(RedmineCAS.setting(:local_users_enabled)) unless RedmineCAS.setting(:local_users_enabled).nil?
+    return ActiveModel::Type::Boolean.new.cast(RedmineCas.setting(:local_users_enabled)) unless RedmineCas.setting(:local_users_enabled).nil?
     return false
   end
 
   def setup!
-    return unless RedmineCAS.enabled?
+    return unless RedmineCas.enabled?
 
     CASClient::Frameworks::Rails::Filter.configure(
-      cas_base_url: RedmineCAS.get_cas_url,
+      cas_base_url: RedmineCas.get_cas_url,
       logger: Rails.logger,
-      validate_url: RedmineCAS.get_cas_url + '/p3/proxyValidate',
-      enable_single_sign_out: single_sign_out_enabled?
+      validate_url: RedmineCas.get_cas_url + '/p3/proxyValidate',
+      enable_single_sign_out: single_sign_out_enabled?,
+      ticket_store: RedmineCas.get_ticket_store
     )
     auth_source = AuthSource.find_by_type('AuthSourceCas')
     create_cas_auth_source if auth_source.nil?
