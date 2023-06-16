@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [v2.1.0] - 2023-06-16
 ### Changed
 - Make cas plugin compatible with rails 6 and ruby 3
 - Update rubycas-client to 2.4.0 (#29)
