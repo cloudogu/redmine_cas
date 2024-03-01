@@ -22,7 +22,7 @@ SOURCE_DIR = '../src'
 FileUtils.mkdir_p(File.join(target_directory, PLUGIN_DIR))
 
 files = Dir.entries(SOURCE_DIR)
-directories = files.select { |entry| File.directory? File.join(SOURCE_DIR, entry) and !(entry == '.' || entry == '..' || entry == 'test') and !entry.start_with? '.' }
+directories = files.select { |entry| File.directory? File.join(SOURCE_DIR, entry) and !(entry == '.' || entry == '..' || entry == 'test') and !entry.start_with?('.') }
 directories.each do |directory|
   FileUtils.cp_r File.join(SOURCE_DIR, directory), File.join(PLUGIN_DIR, directory), :verbose => true
 end
