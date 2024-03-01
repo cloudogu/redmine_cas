@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.1.1] - 2024-03-01
+### Changed
+- Updated documentation for local development
+
+### Fixed
+- Fixed the bug that mail, and firstname/lastname were not updated when changed in cas (#33)
+
 ## [v2.1.0] - 2023-06-16
 ### Changed
 - Make cas plugin compatible with rails 6 and ruby 3
