@@ -61,6 +61,9 @@ module RedmineCas
       else
         # user already exists
         self.update_user_groups(user, user_groups)
+        user.firstname = first_name
+        user.lastname = last_name
+        user.mail = mail
       end
 
       if admin_group_exists
@@ -79,7 +82,8 @@ module RedmineCas
         end
       end
 
-      if !user.save
+      saved_successfully = user.save
+      unless saved_successfully
         raise user.errors.full_messages.to_s
       end
 
