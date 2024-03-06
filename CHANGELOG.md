@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.1.2] - 2024-03-06
+### Fixed
+- Fixed a bug where the cas plugin blocked the helpdesk ticket creation endpoint (#35)
+
 ## [v2.1.1] - 2024-03-01
 ### Changed
 - Updated documentation for local development

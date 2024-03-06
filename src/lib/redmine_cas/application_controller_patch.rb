@@ -56,9 +56,10 @@ module RedmineCas
           end
           return false
         end
-        # this code was added to remove the ticket parameter in url when it is not necessary
-        if params.has_key?(:ticket)
+        # Check if the cas service ticket is set (query param 'ticket')
+        if request.query_parameters.has_key?(:ticket)
           default_url = url_for(params.permit(:ticket).merge(:ticket => nil))
+          # At this point we are already logged in, so the ticket param will be removed by redirect
           redirect_to default_url
         end
         true
