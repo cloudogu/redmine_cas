@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.2.0] - 2024-09-19
+### Changed
+- Relicense to AGPL-3.0-only
+
 ## [v2.1.2] - 2024-03-06
 ### Fixed
 - Fixed a bug where the cas plugin blocked the helpdesk ticket creation endpoint (#35)
