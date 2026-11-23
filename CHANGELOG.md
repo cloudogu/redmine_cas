@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Register the patches via `EasyPatchManager` on Easy8, so the plugin works with Easy8 14.11 (#39)
+- Run the CAS setup on Easy8 only in production (#39)
+
+### Fixed
+- Prepend the `ApplicationController` patch on vanilla Redmine too; included, the controller's own methods won (#39)
+- Load the hook listener and the user patch from their actual paths in `after_init.rb` (#39)
+- Register the setup callback once instead of on every code reload (#39)
+- Use `ActiveSupport::Reloader.to_prepare` instead of the deprecated `RedmineExtensions::Reloader.to_prepare` on Easy8 (#39)
 
 ## [v2.2.0] - 2024-09-19
 ### Changed

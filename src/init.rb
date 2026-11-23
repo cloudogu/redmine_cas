@@ -18,7 +18,8 @@ Redmine::Plugin.register :redmine_cas do
   }, :partial => 'redmine_cas/settings'
 
   unless Module.const_defined?(:RedmineExtensions) then
-    ApplicationController.send(:include, RedmineCas::ApplicationControllerPatch)
+    # prepend, not include: the patch overrides methods ApplicationController defines itself
+    ApplicationController.send(:prepend, RedmineCas::ApplicationControllerPatch)
     AccountController.send(:include, RedmineCas::AccountControllerPatch)
     User.send(:include, RedmineCas::UserPatch)
 
