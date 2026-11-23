@@ -9,7 +9,7 @@ EasyPatchManager.register_controller_patch 'ApplicationController', 'RedmineCas:
 EasyPatchManager.register_controller_patch 'AccountController', 'RedmineCas::AccountControllerPatch'
 EasyPatchManager.register_model_patch 'User', 'RedmineCas::UserPatch'
 
-RedmineExtensions::Reloader.to_prepare do
+ActiveSupport::Reloader.to_prepare do
   require 'redmine_cas/redmine_cas_hook_listener'
 end
 
