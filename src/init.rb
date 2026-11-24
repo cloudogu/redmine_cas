@@ -4,7 +4,7 @@ Redmine::Plugin.register :redmine_cas do
   name 'Redmine CAS plugin'
   author 'hallo@cloudogu.com (Cloudogu GmbH)'
   description 'Plugin to CASify your Redmine installation.'
-  version '2.2.0'
+  version '2.3.0'
   url 'https://github.com/cloudogu/redmine_cas'
 
   settings :default => {
@@ -18,7 +18,8 @@ Redmine::Plugin.register :redmine_cas do
   }, :partial => 'redmine_cas/settings'
 
   unless Module.const_defined?(:RedmineExtensions) then
-    ApplicationController.send(:include, RedmineCas::ApplicationControllerPatch)
+    # prepend, not include: the patch overrides methods ApplicationController defines itself
+    ApplicationController.send(:prepend, RedmineCas::ApplicationControllerPatch)
     AccountController.send(:include, RedmineCas::AccountControllerPatch)
     User.send(:include, RedmineCas::UserPatch)
 
